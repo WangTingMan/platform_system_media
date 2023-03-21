@@ -18,6 +18,11 @@
 #include <string.h>
 #include "private/private.h"
 
+#ifdef _MSC_VER
+#  include <intrin.h>
+#  define __builtin_popcount __popcnt
+#endif
+
 void ditherAndClamp(int32_t *out, const int32_t *sums, size_t pairs)
 {
     for (; pairs > 0; --pairs) {
@@ -407,14 +412,14 @@ size_t nonZeroStereo16(const int16_t *frames, size_t count)
  */
 #define copy_frame_by_mask(dst, dmask, src, smask, count, zero) \
 { \
-    uint32_t bit, ormask; \
+    int32_t bit, ormask; \
     for (; (count) > 0; --(count)) { \
-        ormask = (dmask) | (smask); \
+        ormask = (int32_t)( (dmask) | (smask) ); \
         while (ormask) { \
             bit = ormask & -ormask; /* get lowest bit */ \
             ormask ^= bit; /* remove lowest bit */ \
-            if ((dmask) & bit) { \
-                *(dst)++ = (smask) & bit ? *(src)++ : (zero); \
+            if ((dmask) & (uint32_t)bit) { \
+                *(dst)++ = (smask) & (uint32_t)bit ? *(src)++ : (zero); \
             } else { /* source channel only */ \
                 ++(src); \
             } \
@@ -530,7 +535,7 @@ size_t memcpy_by_index_array_initialization(int8_t *idxary, size_t idxcount,
 {
     size_t n = 0;
     int srcidx = 0;
-    uint32_t bit, ormask = src_mask | dst_mask;
+    int32_t bit, ormask = src_mask | dst_mask;
 
     while (ormask && n < idxcount) {
         bit = ormask & -ormask;          /* get lowest bit */

@@ -22,13 +22,28 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/cdefs.h>
 #include <sys/types.h>
 
 #include "audio-base-utils.h"
 #include "audio-base.h"
 #include "audio-hal-enums.h"
 #include "audio_common-base.h"
+
+#ifdef __cplusplus
+#ifndef __BEGIN_DECLS
+#define __BEGIN_DECLS extern "C" {
+#endif
+#else
+#define __BEGIN_DECLS
+#endif
+
+#ifdef __cplusplus
+#ifndef __END_DECLS
+#define __END_DECLS }
+#endif
+#else
+#define __END_DECLS
+#endif
 
 /*
  * Annotation to tell clang that we intend to fall through from one case to
@@ -111,13 +126,15 @@ typedef enum {
 
 /* Audio attributes */
 #define AUDIO_ATTRIBUTES_TAGS_MAX_SIZE 256
+#pragma pack(1)
 typedef struct {
     audio_content_type_t content_type;
     audio_usage_t        usage;
     audio_source_t       source;
     audio_flags_mask_t   flags;
     char                 tags[AUDIO_ATTRIBUTES_TAGS_MAX_SIZE]; /* UTF8 */
-} __attribute__((packed)) audio_attributes_t; // sent through Binder;
+} /*__attribute__((packed))*/ audio_attributes_t; // sent through Binder;
+#pragma pack()
 
 static const audio_attributes_t AUDIO_ATTRIBUTES_INITIALIZER = {
     /* .content_type = */ AUDIO_CONTENT_TYPE_UNKNOWN,
@@ -288,9 +305,11 @@ static inline audio_channel_representation_t audio_channel_mask_get_representati
 
 #ifdef __cplusplus
 // Some effects use `int32_t` directly for channel mask.
+#if 0
 static inline uint32_t audio_channel_mask_get_representation(int32_t mask) {
     return audio_channel_mask_get_representation(static_cast<audio_channel_mask_t>(mask));
 }
+#endif
 #endif
 
 /* Returns true if the channel mask is valid,
@@ -376,6 +395,7 @@ typedef enum {
  * one of the constants defined here.
  * Must be aligned to transmit as raw memory through Binder.
  */
+#pragma pack(8)
 typedef struct {
     uint16_t version;                   // version of the info structure
     uint16_t size;                      // total size of the structure including version and size
@@ -393,7 +413,8 @@ typedef struct {
     audio_encapsulation_mode_t encapsulation_mode;  // version 0.2:
     int32_t content_id;                 // version 0.2: content id from tuner hal (0 if none)
     int32_t sync_id;                    // version 0.2: sync id from tuner hal (0 if none)
-} __attribute__((aligned(8))) audio_offload_info_t;
+} /*__attribute__((aligned(8)))*/ audio_offload_info_t;
+#pragma pack()
 
 #define AUDIO_MAKE_OFFLOAD_INFO_VERSION(maj,min) \
             ((((maj) & 0xff) << 8) | ((min) & 0xff))
@@ -425,13 +446,16 @@ static const audio_offload_info_t AUDIO_INFO_INITIALIZER = {
  * ensure forward compatibility
  * Must be aligned to transmit as raw memory through Binder.
  */
-struct __attribute__((aligned(8))) audio_config {
+#pragma pack(8)
+struct /*__attribute__((aligned(8)))*/ audio_config {
     uint32_t sample_rate;
     audio_channel_mask_t channel_mask;
     audio_format_t  format;
     audio_offload_info_t offload_info;
     uint32_t frame_count;
 };
+#pragma pack()
+
 typedef struct audio_config audio_config_t;
 
 static const audio_config_t AUDIO_CONFIG_INITIALIZER = {
@@ -1303,9 +1327,11 @@ static inline bool audio_is_input_device(audio_devices_t device)
 
 #ifdef __cplusplus
 // Some effects use `uint32_t` directly for device.
+#if 0
 static inline bool audio_is_input_device(uint32_t device) {
     return audio_is_input_device(static_cast<audio_devices_t>(device));
 }
+#endif
 // This needs to be used when `audio_is_input_device` is passed
 // to an STL algorithm, as otherwise the compiler can't resolve
 // the overload at that point--the type of the container elements
@@ -1494,9 +1520,11 @@ static inline uint32_t audio_channel_count_from_in_mask(audio_channel_mask_t cha
 #ifdef __cplusplus
 // FIXME(b/169889714): buffer_config_t uses `uint32_t` for the mask.
 // A lot of effects code thus use `uint32_t` directly.
+#if 0
 static inline uint32_t audio_channel_count_from_in_mask(uint32_t mask) {
     return audio_channel_count_from_in_mask(static_cast<audio_channel_mask_t>(mask));
 }
+#endif
 #endif
 
 /* Returns the number of channels from an output channel mask,
@@ -1523,9 +1551,11 @@ static inline uint32_t audio_channel_count_from_out_mask(audio_channel_mask_t ch
 #ifdef __cplusplus
 // FIXME(b/169889714): buffer_config_t uses `uint32_t` for the mask.
 // A lot of effects code thus use `uint32_t` directly.
+#if 0
 static inline uint32_t audio_channel_count_from_out_mask(uint32_t mask) {
     return audio_channel_count_from_out_mask(static_cast<audio_channel_mask_t>(mask));
 }
+#endif
 #endif
 
 /* Derive a channel mask for index assignment from a channel count.
@@ -1954,7 +1984,7 @@ static inline char *audio_device_address_to_parameter(audio_devices_t device, co
     } else {
         snprintf(param, kSize, "%s", address);
     }
-    return strdup(param);
+    return _strdup(param);
 }
 
 static inline bool audio_is_valid_audio_source(audio_source_t audioSource)

@@ -20,7 +20,24 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <sys/cdefs.h>
+
+#include <audio_utils/libaudioutils_export.h>
+
+#ifdef __cplusplus
+#ifndef __BEGIN_DECLS
+#define __BEGIN_DECLS extern "C" {
+#endif
+#else
+#define __BEGIN_DECLS
+#endif
+
+#ifdef __cplusplus
+#ifndef __END_DECLS
+#define __END_DECLS }
+#endif
+#else
+#define __END_DECLS
+#endif
 
 /** \cond */
 __BEGIN_DECLS
@@ -53,7 +70,7 @@ __BEGIN_DECLS
  * The out and sums buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void ditherAndClamp(int32_t *out, const int32_t *sums, size_t pairs);
+LIBAUDIOUTILS_EXPORT void ditherAndClamp(int32_t *out, const int32_t *sums, size_t pairs);
 
 /**
  * Copy samples from signed fixed-point 32-bit Q4.27 to 16-bit Q0.15
@@ -65,7 +82,7 @@ void ditherAndClamp(int32_t *out, const int32_t *sums, size_t pairs);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_i16_from_q4_27(int16_t *dst, const int32_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_i16_from_q4_27(int16_t *dst, const int32_t *src, size_t count);
 
 /**
  * Expand and copy samples from unsigned 8-bit offset by 0x80 to signed 16-bit.
@@ -77,7 +94,7 @@ void memcpy_to_i16_from_q4_27(int16_t *dst, const int32_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_i16_from_u8(int16_t *dst, const uint8_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_i16_from_u8(int16_t *dst, const uint8_t *src, size_t count);
 
 /**
  * Shrink and copy samples from signed 16-bit to unsigned 8-bit offset by 0x80.
@@ -90,7 +107,7 @@ void memcpy_to_i16_from_u8(int16_t *dst, const uint8_t *src, size_t count);
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
  */
-void memcpy_to_u8_from_i16(uint8_t *dst, const int16_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_u8_from_i16(uint8_t *dst, const int16_t *src, size_t count);
 
 /**
  * Copy samples from float to unsigned 8-bit offset by 0x80.
@@ -103,7 +120,7 @@ void memcpy_to_u8_from_i16(uint8_t *dst, const int16_t *src, size_t count);
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
  */
-void memcpy_to_u8_from_float(uint8_t *dst, const float *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_u8_from_float(uint8_t *dst, const float *src, size_t count);
 
 /**
  * Copy samples from signed fixed-point packed 24 bit Q0.23 to unsigned 8-bit offset by 0x80.
@@ -116,7 +133,7 @@ void memcpy_to_u8_from_float(uint8_t *dst, const float *src, size_t count);
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
  */
-void memcpy_to_u8_from_p24(uint8_t *dst, const uint8_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_u8_from_p24(uint8_t *dst, const uint8_t *src, size_t count);
 
 /**
  * Copy samples from signed 32-bit fixed-point Q0.31 to unsigned 8-bit offset by 0x80.
@@ -129,7 +146,7 @@ void memcpy_to_u8_from_p24(uint8_t *dst, const uint8_t *src, size_t count);
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
  */
-void memcpy_to_u8_from_i32(uint8_t *dst, const int32_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_u8_from_i32(uint8_t *dst, const int32_t *src, size_t count);
 
 /**
  * Copy samples from signed fixed-point 32-bit Q8.23 to unsigned 8-bit offset by 0x80.
@@ -142,7 +159,7 @@ void memcpy_to_u8_from_i32(uint8_t *dst, const int32_t *src, size_t count);
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
  */
-void memcpy_to_u8_from_q8_23(uint8_t *dst, const int32_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_u8_from_q8_23(uint8_t *dst, const int32_t *src, size_t count);
 
 /**
  * Shrink and copy samples from signed 32-bit fixed-point Q0.31 to signed 16-bit Q0.15.
@@ -155,7 +172,7 @@ void memcpy_to_u8_from_q8_23(uint8_t *dst, const int32_t *src, size_t count);
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
  */
-void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count);
 
 /**
  * Shrink and copy samples from single-precision floating-point to signed 16-bit.
@@ -170,7 +187,7 @@ void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count);
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
  */
-void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count);
 
 /**
  * Copy samples from signed fixed-point 32-bit Q4.27 to single-precision floating-point.
@@ -185,7 +202,7 @@ void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_float_from_q4_27(float *dst, const int32_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_float_from_q4_27(float *dst, const int32_t *src, size_t count);
 
 /**
  * Copy samples from signed fixed-point 16 bit Q0.15 to single-precision floating-point.
@@ -199,7 +216,7 @@ void memcpy_to_float_from_q4_27(float *dst, const int32_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_float_from_i16(float *dst, const int16_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_float_from_i16(float *dst, const int16_t *src, size_t count);
 
 /**
  * Copy samples from unsigned fixed-point 8 bit to single-precision floating-point.
@@ -213,7 +230,7 @@ void memcpy_to_float_from_i16(float *dst, const int16_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_float_from_u8(float *dst, const uint8_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_float_from_u8(float *dst, const uint8_t *src, size_t count);
 
 /**
  * Copy samples from signed fixed-point packed 24 bit Q0.23 to single-precision floating-point.
@@ -228,7 +245,7 @@ void memcpy_to_float_from_u8(float *dst, const uint8_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_float_from_p24(float *dst, const uint8_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_float_from_p24(float *dst, const uint8_t *src, size_t count);
 
 /**
  * Copy samples from signed fixed-point packed 24 bit Q0.23 to signed fixed point 16 bit Q0.15.
@@ -242,7 +259,7 @@ void memcpy_to_float_from_p24(float *dst, const uint8_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_i16_from_p24(int16_t *dst, const uint8_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_i16_from_p24(int16_t *dst, const uint8_t *src, size_t count);
 
 /**
  * Copy samples from signed fixed-point packed 24 bit Q0.23 to signed fixed-point 32-bit Q0.31.
@@ -256,7 +273,7 @@ void memcpy_to_i16_from_p24(int16_t *dst, const uint8_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_i32_from_p24(int32_t *dst, const uint8_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_i32_from_p24(int32_t *dst, const uint8_t *src, size_t count);
 
 /**
  * Copy samples from signed fixed point 16 bit Q0.15 to signed fixed-point packed 24 bit Q0.23.
@@ -271,7 +288,7 @@ void memcpy_to_i32_from_p24(int32_t *dst, const uint8_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count);
 
 /**
  * Copy samples from single-precision floating-point to signed fixed-point packed 24 bit Q0.23.
@@ -286,7 +303,7 @@ void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count);
 
 /**
  * Copy samples from signed fixed-point 32-bit Q8.23 to signed fixed-point packed 24 bit Q0.23.
@@ -300,7 +317,7 @@ void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.
  */
-void memcpy_to_p24_from_q8_23(uint8_t *dst, const int32_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_p24_from_q8_23(uint8_t *dst, const int32_t *src, size_t count);
 
 /**
  * Shrink and copy samples from signed 32-bit fixed-point Q0.31
@@ -315,7 +332,7 @@ void memcpy_to_p24_from_q8_23(uint8_t *dst, const int32_t *src, size_t count);
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * The conversion is done by truncation, without dithering, so it loses resolution.
  */
-void memcpy_to_p24_from_i32(uint8_t *dst, const int32_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_p24_from_i32(uint8_t *dst, const int32_t *src, size_t count);
 
 /**
  * Copy samples from signed fixed point 16-bit Q0.15 to signed fixed-point 32-bit Q8.23.
@@ -328,7 +345,7 @@ void memcpy_to_p24_from_i32(uint8_t *dst, const int32_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_q8_23_from_i16(int32_t *dst, const int16_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_q8_23_from_i16(int32_t *dst, const int16_t *src, size_t count);
 
 /**
  * Copy samples from single-precision floating-point to signed fixed-point 32-bit Q8.23.
@@ -343,7 +360,7 @@ void memcpy_to_q8_23_from_i16(int32_t *dst, const int16_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_q8_23_from_float_with_clamp(int32_t *dst, const float *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_q8_23_from_float_with_clamp(int32_t *dst, const float *src, size_t count);
 
 /**
  * Copy samples from signed fixed point packed 24-bit Q0.23 to signed fixed-point 32-bit Q8.23.
@@ -356,7 +373,7 @@ void memcpy_to_q8_23_from_float_with_clamp(int32_t *dst, const float *src, size_
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_q8_23_from_p24(int32_t *dst, const uint8_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_q8_23_from_p24(int32_t *dst, const uint8_t *src, size_t count);
 
 /**
  * Copy samples from single-precision floating-point to signed fixed-point 32-bit Q4.27.
@@ -371,7 +388,7 @@ void memcpy_to_q8_23_from_p24(int32_t *dst, const uint8_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_q4_27_from_float(int32_t *dst, const float *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_q4_27_from_float(int32_t *dst, const float *src, size_t count);
 
 /**
  * Copy samples from signed fixed-point 32-bit Q8.23 to signed fixed point 16-bit Q0.15.
@@ -384,7 +401,7 @@ void memcpy_to_q4_27_from_float(int32_t *dst, const float *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_i16_from_q8_23(int16_t *dst, const int32_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_i16_from_q8_23(int16_t *dst, const int32_t *src, size_t count);
 
 /**
  * Copy samples from signed fixed-point 32-bit Q8.23 to single-precision floating-point.
@@ -400,7 +417,7 @@ void memcpy_to_i16_from_q8_23(int16_t *dst, const int32_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_float_from_q8_23(float *dst, const int32_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_float_from_q8_23(float *dst, const int32_t *src, size_t count);
 
 /**
  * Expand and copy samples from unsigned 8-bit offset by 0x80 to signed 32-bit.
@@ -412,7 +429,7 @@ void memcpy_to_float_from_q8_23(float *dst, const int32_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_i32_from_u8(int32_t *dst, const uint8_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_i32_from_u8(int32_t *dst, const uint8_t *src, size_t count);
 
 /**
  * Copy samples from signed fixed point 16-bit Q0.15 to signed fixed-point 32-bit Q0.31.
@@ -425,7 +442,7 @@ void memcpy_to_i32_from_u8(int32_t *dst, const uint8_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_i32_from_i16(int32_t *dst, const int16_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_i32_from_i16(int32_t *dst, const int16_t *src, size_t count);
 
 /**
  * Copy samples from single-precision floating-point to signed fixed-point 32-bit Q0.31.
@@ -439,7 +456,7 @@ void memcpy_to_i32_from_i16(int32_t *dst, const int16_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_i32_from_float(int32_t *dst, const float *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_i32_from_float(int32_t *dst, const float *src, size_t count);
 
 /**
  * Copy samples from signed fixed-point 32-bit Q0.31 to single-precision floating-point.
@@ -453,7 +470,7 @@ void memcpy_to_i32_from_float(int32_t *dst, const float *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_float_from_i32(float *dst, const int32_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void memcpy_to_float_from_i32(float *dst, const int32_t *src, size_t count);
 
 /**
  * Copy samples from unrestricted float to range restricted float [-absMax, absMax].
@@ -468,7 +485,7 @@ void memcpy_to_float_from_i32(float *dst, const int32_t *src, size_t count);
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  * Note: NAN is clamped to absMax and not 0 for performance reason (~2xfaster).
  */
-void memcpy_to_float_from_float_with_clamping(float *dst, const float *src, size_t count,
+LIBAUDIOUTILS_EXPORT void memcpy_to_float_from_float_with_clamping(float *dst, const float *src, size_t count,
                                               float absMax);
 
 /**
@@ -481,7 +498,7 @@ void memcpy_to_float_from_float_with_clamping(float *dst, const float *src, size
  * The destination and source buffers must be completely separate (non-overlapping).
  * The current implementation truncates the mean rather than dither, but this may change.
  */
-void downmix_to_mono_i16_from_stereo_i16(int16_t *dst, const int16_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void downmix_to_mono_i16_from_stereo_i16(int16_t *dst, const int16_t *src, size_t count);
 
 /**
  * Upmix mono input 16-bit samples to pairs of interleaved stereo output 16-bit samples by
@@ -494,7 +511,7 @@ void downmix_to_mono_i16_from_stereo_i16(int16_t *dst, const int16_t *src, size_
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void upmix_to_stereo_i16_from_mono_i16(int16_t *dst, const int16_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void upmix_to_stereo_i16_from_mono_i16(int16_t *dst, const int16_t *src, size_t count);
 
 /**
  * Downmix pairs of interleaved stereo input float samples to mono output float samples
@@ -507,7 +524,7 @@ void upmix_to_stereo_i16_from_mono_i16(int16_t *dst, const int16_t *src, size_t 
  * The destination and source buffers must be completely separate (non-overlapping),
  * or they must both start at the same address.
  */
-void downmix_to_mono_float_from_stereo_float(float *dst, const float *src, size_t count);
+LIBAUDIOUTILS_EXPORT void downmix_to_mono_float_from_stereo_float(float *dst, const float *src, size_t count);
 
 /**
  * Upmix mono input float samples to pairs of interleaved stereo output float samples by
@@ -520,29 +537,29 @@ void downmix_to_mono_float_from_stereo_float(float *dst, const float *src, size_
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void upmix_to_stereo_float_from_mono_float(float *dst, const float *src, size_t count);
+LIBAUDIOUTILS_EXPORT void upmix_to_stereo_float_from_mono_float(float *dst, const float *src, size_t count);
 
 /**
  * \return the total number of non-zero 32-bit samples.
  */
-size_t nonZeroMono32(const int32_t *samples, size_t count);
+LIBAUDIOUTILS_EXPORT size_t nonZeroMono32(const int32_t *samples, size_t count);
 
 /**
  * \return the total number of non-zero 16-bit samples.
  */
-size_t nonZeroMono16(const int16_t *samples, size_t count);
+LIBAUDIOUTILS_EXPORT size_t nonZeroMono16(const int16_t *samples, size_t count);
 
 /**
  * \return the total number of non-zero stereo frames, where a frame is considered non-zero
  * if either of its constituent 32-bit samples is non-zero.
  */
-size_t nonZeroStereo32(const int32_t *frames, size_t count);
+LIBAUDIOUTILS_EXPORT size_t nonZeroStereo32(const int32_t *frames, size_t count);
 
 /**
  * \return the total number of non-zero stereo frames, where a frame is considered non-zero
  * if either of its constituent 16-bit samples is non-zero.
  */
-size_t nonZeroStereo16(const int16_t *frames, size_t count);
+LIBAUDIOUTILS_EXPORT size_t nonZeroStereo16(const int16_t *frames, size_t count);
 
 /**
  * Copy frames, selecting source samples based on a source channel mask to fit
@@ -561,7 +578,7 @@ size_t nonZeroStereo16(const int16_t *frames, size_t count);
  * The destination and source buffers must be completely separate (non-overlapping).
  * If the sample size is not in range, the function will abort.
  */
-void memcpy_by_channel_mask(void *dst, uint32_t dst_mask,
+LIBAUDIOUTILS_EXPORT void memcpy_by_channel_mask(void *dst, uint32_t dst_mask,
         const void *src, uint32_t src_mask, size_t sample_size, size_t count);
 
 /**
@@ -600,7 +617,7 @@ void memcpy_by_channel_mask(void *dst, uint32_t dst_mask,
  * The destination and source buffers must be completely separate (non-overlapping).
  * If the sample size is not in range, the function will abort.
  */
-void memcpy_by_index_array(void *dst, uint32_t dst_channels,
+LIBAUDIOUTILS_EXPORT void memcpy_by_index_array(void *dst, uint32_t dst_channels,
         const void *src, uint32_t src_channels,
         const int8_t *idxary, size_t sample_size, size_t count);
 
@@ -625,7 +642,7 @@ void memcpy_by_index_array(void *dst, uint32_t dst_channels,
  *  \param dst_mask    Bit mask corresponding to destination channels present
  *  \param src_mask    Bit mask corresponding to source channels present
  */
-size_t memcpy_by_index_array_initialization(int8_t *idxary, size_t idxcount,
+LIBAUDIOUTILS_EXPORT size_t memcpy_by_index_array_initialization(int8_t *idxary, size_t idxcount,
         uint32_t dst_mask, uint32_t src_mask);
 
 /**
@@ -645,7 +662,7 @@ size_t memcpy_by_index_array_initialization(int8_t *idxary, size_t idxcount,
  *  \param dst_mask    Bit mask corresponding to destination channels present
  *  \param src_mask    Bit mask corresponding to source channels present
  */
-size_t memcpy_by_index_array_initialization_src_index(int8_t *idxary, size_t idxcount,
+LIBAUDIOUTILS_EXPORT size_t memcpy_by_index_array_initialization_src_index(int8_t *idxary, size_t idxcount,
         uint32_t dst_mask, uint32_t src_mask);
 
 /**
@@ -668,7 +685,7 @@ size_t memcpy_by_index_array_initialization_src_index(int8_t *idxary, size_t idx
  *  \param dst_mask    Bit mask corresponding to destination channels present
  *  \param src_mask    Bit mask corresponding to source channels present
  */
-size_t memcpy_by_index_array_initialization_dst_index(int8_t *idxary, size_t idxcount,
+LIBAUDIOUTILS_EXPORT size_t memcpy_by_index_array_initialization_dst_index(int8_t *idxary, size_t idxcount,
         uint32_t dst_mask, uint32_t src_mask);
 
 /**
@@ -681,7 +698,7 @@ size_t memcpy_by_index_array_initialization_dst_index(int8_t *idxary, size_t idx
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void accumulate_i16(int16_t *dst, const int16_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void accumulate_i16(int16_t *dst, const int16_t *src, size_t count);
 
 /**
  * Add and clamp unsigned 8-bit samples.
@@ -693,7 +710,7 @@ void accumulate_i16(int16_t *dst, const int16_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void accumulate_u8(uint8_t *dst, const uint8_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void accumulate_u8(uint8_t *dst, const uint8_t *src, size_t count);
 
 /**
  * Add and clamp packed 24-bit Q0.23 samples.
@@ -705,7 +722,7 @@ void accumulate_u8(uint8_t *dst, const uint8_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void accumulate_p24(uint8_t *dst, const uint8_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void accumulate_p24(uint8_t *dst, const uint8_t *src, size_t count);
 
 /**
  * Add and clamp 32-bit Q8.23 samples.
@@ -717,7 +734,7 @@ void accumulate_p24(uint8_t *dst, const uint8_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void accumulate_q8_23(int32_t *dst, const int32_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void accumulate_q8_23(int32_t *dst, const int32_t *src, size_t count);
 
 /**
  * Add and clamp signed 32-bit Q0.31 samples.
@@ -729,7 +746,7 @@ void accumulate_q8_23(int32_t *dst, const int32_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void accumulate_i32(int32_t *dst, const int32_t *src, size_t count);
+LIBAUDIOUTILS_EXPORT void accumulate_i32(int32_t *dst, const int32_t *src, size_t count);
 
 /**
  * Add float samples. Result is not clamped.
@@ -741,7 +758,7 @@ void accumulate_i32(int32_t *dst, const int32_t *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void accumulate_float(float *dst, const float *src, size_t count);
+LIBAUDIOUTILS_EXPORT void accumulate_float(float *dst, const float *src, size_t count);
 
 /**
  * Clamp (aka hard limit or clip) a signed 32-bit sample to 16-bit range.
@@ -1039,8 +1056,8 @@ static inline float float_from_u4_12(uint16_t uval)
  */
 static inline uint32_t u4_28_from_float(float f)
 {
-    static const float scale = (float)(1 << 28);
-    static const float limpos = ((float) 0xffffffffUL) / scale;
+#define scale_u4_28_from_float ((float)(1 << 28))
+    static const float limpos = ((float) 0xffffffffUL) / scale_u4_28_from_float;
 
     if (f <= 0.) {
         return 0;
@@ -1050,7 +1067,7 @@ static inline uint32_t u4_28_from_float(float f)
     /* integer conversion is through truncation (though int to float is not).
      * ensure that we round to nearest, ties away from 0.
      */
-    return f * scale + 0.5;
+    return f * scale_u4_28_from_float + 0.5;
 }
 
 /**
@@ -1063,8 +1080,8 @@ static inline uint32_t u4_28_from_float(float f)
  */
 static inline uint16_t u4_12_from_float(float f)
 {
-    static const float scale = (float)(1 << 12);
-    static const float limpos = 0xffff / scale;
+#define scale_u4_12_from_float ((float)(1 << 12))
+    static const float limpos = 0xffff / scale_u4_12_from_float;
 
     if (f <= 0.) {
         return 0;
@@ -1074,7 +1091,7 @@ static inline uint16_t u4_12_from_float(float f)
     /* integer conversion is through truncation (though int to float is not).
      * ensure that we round to nearest, ties away from 0.
      */
-    return f * scale + 0.5;
+    return f * scale_u4_12_from_float + 0.5;
 }
 
 /**
