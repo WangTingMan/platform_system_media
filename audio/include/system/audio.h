@@ -29,6 +29,11 @@
 #include "audio-hal-enums.h"
 #include "audio_common-base.h"
 
+#ifdef _MSC_VER
+#  include <intrin.h>
+#  define __builtin_popcount __popcnt
+#endif
+
 #ifdef __cplusplus
 #ifndef __BEGIN_DECLS
 #define __BEGIN_DECLS extern "C" {
