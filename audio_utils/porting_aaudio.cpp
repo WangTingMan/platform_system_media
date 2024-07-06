@@ -136,4 +136,9 @@ void AAudioStreamBuilder_setErrorCallback( AAudioStreamBuilder* aBuilder, ErrorC
 
 }
 
+aaudio_session_id_t AAudioStream_getSessionId( AAudioStream* stream )
+{
+    return AAUDIO_SESSION_ID_ALLOCATE;
+}
+
 #endif

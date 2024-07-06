@@ -11,11 +11,6 @@ enum AAUDIO_FORMAT
 
 enum
 {
-    AAUDIO_SESSION_ID_ALLOCATE
-};
-
-enum
-{
     AAUDIO_PERFORMANCE_MODE_LOW_LATENCY
 };
 
@@ -31,6 +26,35 @@ enum
     */
     AAUDIO_ERROR_DISCONNECTED,
 };
+
+/**
+ * These may be used with AAudioStreamBuilder_setSessionId().
+ *
+ * Added in API level 28.
+ */
+enum
+{
+    /**
+     * Do not allocate a session ID.
+     * Effects cannot be used with this stream.
+     * Default.
+     *
+     * Added in API level 28.
+     */
+    AAUDIO_SESSION_ID_NONE = -1,
+
+    /**
+     * Allocate a session ID that can be used to attach and control
+     * effects using the Java AudioEffects API.
+     * Note that using this may result in higher latency.
+     *
+     * Note that this matches the value of AudioManager.AUDIO_SESSION_ID_GENERATE.
+     *
+     * Added in API level 28.
+     */
+    AAUDIO_SESSION_ID_ALLOCATE = 0,
+};
+typedef int32_t aaudio_session_id_t;
 
 struct AAudioStreamBuidlerParameters;
 
@@ -71,6 +95,31 @@ LIBAUDIOUTILS_EXPORT void AAudioStream_requestPause( AAudioStream* );
 LIBAUDIOUTILS_EXPORT void AAudioStream_requestFlush( AAudioStream* );
 
 LIBAUDIOUTILS_EXPORT void AAudioStreamBuilder_setErrorCallback( AAudioStreamBuilder*, ErrorCallbackType, void* );
+
+/**
+ * Passes back the session ID associated with this stream.
+ *
+ * The session ID can be used to associate a stream with effects processors.
+ * The effects are controlled using the Android AudioEffect Java API.
+ *
+ * If AAudioStreamBuilder_setSessionId() was
+ * called with {@link #AAUDIO_SESSION_ID_ALLOCATE}
+ * then a new session ID should be allocated once when the stream is opened.
+ *
+ * If AAudioStreamBuilder_setSessionId() was called with a previously allocated
+ * session ID then that value should be returned.
+ *
+ * If AAudioStreamBuilder_setSessionId() was not called then this function should
+ * return {@link #AAUDIO_SESSION_ID_NONE}.
+ *
+ * The sessionID for a stream should not change once the stream has been opened.
+ *
+ * Available since API level 28.
+ *
+ * @param stream reference provided by AAudioStreamBuilder_openStream()
+ * @return session ID or {@link #AAUDIO_SESSION_ID_NONE}
+ */
+LIBAUDIOUTILS_EXPORT aaudio_session_id_t AAudioStream_getSessionId( AAudioStream* stream );
 
 /**
  * Write data to the stream.
