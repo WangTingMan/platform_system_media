@@ -84,8 +84,6 @@ const uint16_t
         = { 1, 2, 3, 6 };
 
 // Defined in IEC61937-2
-#define SPDIF_DATA_TYPE_AC3     1
-#define SPDIF_DATA_TYPE_E_AC3  21
 #define AC3_STREAM_TYPE_0       0
 #define AC3_STREAM_TYPE_1       1
 #define AC3_STREAM_TYPE_2       2
@@ -93,7 +91,7 @@ const uint16_t
 
 // Scanner for AC3 byte streams.
 AC3FrameScanner::AC3FrameScanner(audio_format_t format)
- : FrameScanner(SPDIF_DATA_TYPE_AC3,
+ : FrameScanner(kSpdifDataTypeAc3,
         AC3FrameScanner::kSyncBytes,
         sizeof(AC3FrameScanner::kSyncBytes), 6)
  , mStreamType(0)
@@ -130,7 +128,7 @@ void AC3FrameScanner::resetBurst()
 // Per IEC 61973-3:5.3.3, for E-AC3 burst-length shall be in bytes.
 uint16_t AC3FrameScanner::convertBytesToLengthCode(uint16_t numBytes) const
 {
-    return (mDataType == SPDIF_DATA_TYPE_E_AC3) ? numBytes : numBytes * 8;
+    return (mDataType == kSpdifDataTypeEac3) ? numBytes : numBytes * 8;
 }
 
 // per IEC 61973-3 Paragraph 5.3.3
@@ -140,7 +138,7 @@ uint16_t AC3FrameScanner::convertBytesToLengthCode(uint16_t numBytes) const
 // the 7th block of substream#0.
 bool AC3FrameScanner::isFirstInBurst()
 {
-    if (mDataType == SPDIF_DATA_TYPE_E_AC3) {
+    if (mDataType == kSpdifDataTypeEac3) {
         if (((mStreamType == AC3_STREAM_TYPE_0)
                 || (mStreamType == AC3_STREAM_TYPE_2))
                 && (mSubstreamID == 0)
@@ -158,7 +156,7 @@ bool AC3FrameScanner::isLastInBurst()
 {
     // For EAC3 we don't know if we are the end until we see a
     // frame that must be at the beginning. See isFirstInBurst().
-    return (mDataType != SPDIF_DATA_TYPE_E_AC3); // Just one AC3 frame per burst.
+    return (mDataType != kSpdifDataTypeEac3); // Just one AC3 frame per burst.
 }
 
 // TODO Use BitFieldParser
@@ -174,9 +172,9 @@ bool AC3FrameScanner::parseHeader()
     // Check BSID to see if this is EAC3 or regular AC3.
     // These arbitrary BSID numbers do not have any names in the spec.
     if ((bsid > 10) && (bsid <= 16)) {
-        mDataType = SPDIF_DATA_TYPE_E_AC3;
+        mDataType = kSpdifDataTypeEac3;
     } else if (bsid <= 8) {
-        mDataType = SPDIF_DATA_TYPE_AC3;
+        mDataType = kSpdifDataTypeAc3;
     } else {
         ALOGW("AC3 bsid = %d not supported", bsid);
         return false;
@@ -184,13 +182,23 @@ bool AC3FrameScanner::parseHeader()
 
     // bitstream mode, main, commentary, etc.
     uint32_t bsmod = mHeaderBuffer[5] & 7;
-    mDataTypeInfo = bsmod; // as per IEC61937-3, table 3.
+
+    mDataTypeInfo = 0;
 
     // The names fscod, frmsiz are from the AC3 spec.
     uint32_t fscod = mHeaderBuffer[4] >> 6;
-    if (mDataType == SPDIF_DATA_TYPE_E_AC3) {
+    if (mDataType == kSpdifDataTypeEac3) {
         mStreamType = mHeaderBuffer[2] >> 6; // strmtyp in spec
         mSubstreamID = (mHeaderBuffer[2] >> 3) & 0x07;
+        // For EAC3 stream, only set data-type-dependent information as the value of
+        // bsmod in independent substream 0 of EAC3 elementary stream.
+        if (mStreamType != 1 && mSubstreamID == 0) {
+            const int infomdate = (mHeaderBuffer[5] >> 3) & 1;
+            if (infomdate == 1) {
+                mDataTypeInfo = bsmod;
+            }
+        }
+
 
         // Frame size is explicit in EAC3. Paragraph E2.3.1.3
         uint32_t frmsiz = ((mHeaderBuffer[2] & 0x07) << 8) + mHeaderBuffer[3];
@@ -215,7 +223,7 @@ bool AC3FrameScanner::parseHeader()
             mSampleRate = kAC3SampleRateTable[fscod];
             numblkscod = (mHeaderBuffer[4] >> 4) & 0x03;
         }
-        mRateMultiplier = EAC3_RATE_MULTIPLIER; // per IEC 61973-3 Paragraph 5.3.3
+        mRateMultiplier = kSpdifRateMultiplierEac3;  // per IEC 61973-3 Paragraph 5.3.3
         // Don't send data burst until we have 6 blocks per substream.
         mAudioBlocksPerSyncFrame = kEAC3BlocksPerFrameTable[numblkscod];
         // Keep track of how many audio blocks we have for each substream.
@@ -231,6 +239,7 @@ bool AC3FrameScanner::parseHeader()
                 "EAC3 mStreamType = %d, mSubstreamID = %d",
                 mStreamType, mSubstreamID);
     } else { // regular AC3
+        mDataTypeInfo = bsmod; // as per IEC61937-3, table 3.
         // Extract sample rate and frame size from codes.
         uint32_t frmsizcod = mHeaderBuffer[4] & 0x3F; // frame size code
 
@@ -252,8 +261,8 @@ bool AC3FrameScanner::parseHeader()
             mStreamType = 2;
             mSubstreamID = 0;
             mSubstreamBlockCounts[0] += mAudioBlocksPerSyncFrame;
-            mDataType = SPDIF_DATA_TYPE_E_AC3;
-            mRateMultiplier = EAC3_RATE_MULTIPLIER;
+            mDataType = kSpdifDataTypeEac3;
+            mRateMultiplier = kSpdifRateMultiplierEac3;
         }
     }
     ALOGI_IF((mFormatDumpCount == 0),

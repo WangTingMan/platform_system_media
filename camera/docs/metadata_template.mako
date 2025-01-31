@@ -128,8 +128,16 @@
                 permission_needed="true"
           % endif
 
+          % if prop.aconfig_flag:
+                aconfig_flag="${prop.aconfig_flag}"
+          % endif
+
           % if (prop.hal_major_version, prop.hal_minor_version) != (3,2):
                 hal_version="${prop.hal_major_version}.${prop.hal_minor_version}"
+          % endif
+
+          % if prop.session_characteristics_key_since:
+                session_characteristics_key_since="${prop.session_characteristics_key_since}"
           % endif
             >
 
@@ -164,6 +172,9 @@
                     % endif
                     % if not (value.hal_major_version == prop.hal_major_version and value.hal_minor_version == prop.hal_minor_version):
                              hal_version=${"%d.%d" % (value.hal_major_version, value.hal_minor_version)}
+                    % endif
+                    % if not (value.aconfig_flag == prop.aconfig_flag):
+                             aconfig_flag="${value.aconfig_flag}"
                     % endif
                       >${value.name}
                     % if value.notes is not None:

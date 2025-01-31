@@ -8,16 +8,14 @@ package {
 
 subdirs = ["tests"]
 
-cc_library_shared {
+// Note: The static version of libcamera_metadata should be used for testing ONLY.
+cc_library {
     name: "libcamera_metadata",
     vendor_available: true,
     product_available: true,
     // TODO(b/153609531): remove when no longer needed.
     native_bridge_supported: true,
     host_supported: true,
-    vndk: {
-        enabled: true,
-    },
     double_loadable: true,
     srcs: ["src/camera_metadata.c"],
 
@@ -39,8 +37,8 @@ cc_library_shared {
 
     cflags: [
         "-Wall",
-        "-Wextra",
         "-Werror",
+        "-Wextra",
         "-fvisibility=hidden",
         "-std=c11",
     ],
@@ -49,8 +47,8 @@ cc_library_shared {
         eng: {
             // Enable assert()
             cflags: [
-                "-UNDEBUG",
                 "-DLOG_NDEBUG=1",
+                "-UNDEBUG",
             ],
         },
     },
@@ -61,19 +59,23 @@ cc_library_shared {
 
     srcs: [
         "src/camera_metadata_asserts.cpp",
+        "src/ndk_camera_metadata_asserts.cpp",
     ],
 
     include_dirs: ["system/media/private/camera/include"],
     local_include_dirs: ["include"],
 
     static_libs: [
-        "android.hardware.camera.metadata-V1-ndk",
+        "android.hardware.camera.metadata-V3-ndk",
+    ],
+    shared_libs: [
+        "libcamera2ndk",
     ],
 
     cflags: [
         "-Wall",
-        "-Wextra",
         "-Werror",
+        "-Wextra",
         "-fvisibility=hidden",
         "-std=c11",
     ],

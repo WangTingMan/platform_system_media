@@ -42,10 +42,11 @@
     concatenated_info = description + details + extra_detail
 %>\
 ## Glue description and details together before javadoc-izing. Otherwise @see in middle of javadoc.
+## Avoid @see across differently-flagged API entries for now.
 ${concatenated_info | javadoc(metadata)}\
   % if entry.enum and not (entry.typedef and entry.typedef.languages.get('java')):
     % for value in entry.enum.values:
-     % if not value.hidden:
+     % if not value.hidden and (value.aconfig_flag == entry.aconfig_flag):
      * @see #${jenum_value(entry, value)}
      % endif
     % endfor
@@ -54,19 +55,25 @@ ${concatenated_info | javadoc(metadata)}\
      * @deprecated
 ${entry.deprecation_description | javadoc(metadata)}
   % endif
-  % if entry.applied_visibility in ('hidden', 'ndk_public', 'fwk_only'):
+  % if entry.applied_visibility in ('hidden', 'ndk_public', 'fwk_only', 'extension'):
      * @hide
   % endif
      */
   % if entry.deprecated:
     @Deprecated
   % endif
-  % if entry.applied_visibility in ('public', 'java_public'):
+  % if entry.applied_visibility in ('public', 'java_public', 'fwk_java_public'):
     @PublicKey
     @NonNull
   % endif
   % if entry.synthetic:
     @SyntheticKey
+  % endif
+  % if entry.applied_visibility in ('extension'):
+    @ExtensionKey
+  % endif
+  % if entry.aconfig_flag:
+    @FlaggedApi(Flags.FLAG_${entry.aconfig_flag | jkey_identifier})
   % endif
     public static final Key<${jtype_boxed(entry)}> ${entry.name | jkey_identifier} =
             new Key<${jtype_boxed(entry)}>("${entry.name}", ${jkey_type_token(entry)});
@@ -77,17 +84,17 @@ ${entry.deprecation_description | javadoc(metadata)}
 % for outer_namespace in metadata.outer_namespaces: ## assumes single 'android' namespace
   % for section in outer_namespace.sections:
     % if section.find_first(lambda x: isinstance(x, metadata_model.Entry) and x.kind == xml_name) and \
-         any_visible(section, xml_name, ('public','hidden','ndk_public','java_public','fwk_only') ):
+         any_visible(section, xml_name, ('public','hidden','ndk_public','java_public','fwk_only','fwk_java_public','extension') ):
       % for inner_namespace in get_children_by_filtering_kind(section, xml_name, 'namespaces'):
 ## We only support 1 level of inner namespace, i.e. android.a.b and android.a.b.c works, but not android.a.b.c.d
 ## If we need to support more, we should use a recursive function here instead.. but the indentation gets trickier.
-        % for entry in filter_visibility(inner_namespace.merged_entries, ('hidden','public', 'ndk_public', 'java_public ', 'fwk_only')):
+        % for entry in filter_visibility(inner_namespace.merged_entries, ('hidden','public','ndk_public','java_public','fwk_only','fwk_java_public','extension')):
 ${generate_key(entry)}
        % endfor
     % endfor
     % for entry in filter_visibility( \
         get_children_by_filtering_kind(section, xml_name, 'merged_entries'), \
-                                         ('hidden', 'public', 'ndk_public', 'java_public', 'fwk_only')):
+               ('hidden', 'public', 'ndk_public', 'java_public', 'fwk_only', 'fwk_java_public','extension')):
 ${generate_key(entry)}
     % endfor
     % endif
@@ -104,6 +111,3 @@ ${generate_key(entry)}
 ## Dynamic properties only
 ##${single_kind_keys('CaptureResultKeys', 'dynamic')}
 ${single_kind_keys(java_class, xml_kind)}\
-    /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
-     * End generated code
-     *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/

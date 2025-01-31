@@ -977,16 +977,19 @@ class EnumValue(Node):
     id: An optional numeric string, e.g. '0' or '0xFF'
     deprecated: A boolean, True if the enum should be deprecated.
     optional: A boolean
-    visibility: A string, one of "system", "java_public", "ndk_public", "hidden", "public"
+    visibility: A string, one of "system", "java_public", "ndk_public", "hidden", "public",
+                "fwk_java_public", "extension"
     notes: A string describing the notes, or None.
     sdk_notes: A string describing extra notes for public SDK only
     ndk_notes: A string describing extra notes for public NDK only
     parent: An edge to the parent, always an Enum instance.
     hal_major_version: The major HIDL HAL version this value was first added in
     hal_minor_version: The minor HIDL HAL version this value was first added in
+    aconfig_flag: The aconfig flag name that determines if this enum value is actually enabled
   """
   def __init__(self, name, parent,
-               id=None, deprecated=False, optional=False, visibility=None, notes=None, sdk_notes=None, ndk_notes=None, hal_version='3.2'):
+               id=None, deprecated=False, optional=False, visibility=None, notes=None,
+               sdk_notes=None, ndk_notes=None, hal_version='3.2', aconfig_flag=None):
     self._name = name                    # str, e.g. 'ON' or 'OFF'
     self._id = id                        # int, e.g. '0'
     self._deprecated = deprecated        # bool
@@ -1006,6 +1009,11 @@ class EnumValue(Node):
     else:
       self._hal_major_version = int(hal_version.partition('.')[0])
       self._hal_minor_version = int(hal_version.partition('.')[2])
+
+    self._aconfig_flag = aconfig_flag
+    if self._aconfig_flag is None:
+      if parent is not None and parent.parent is not None:
+        self._aconfig_flag = parent.parent.aconfig_flag
 
   @property
   def id(self):
@@ -1032,13 +1040,14 @@ class EnumValue(Node):
     parent_enum = None
     if (self.parent is not None and self.parent.parent is not None):
       parent_enum = self.parent.parent
-    if parent_enum is not None and parent_enum.visibility == 'fwk_only' or self._visibility == 'fwk_only':
+    if parent_enum is not None and parent_enum.visibility in ('fwk_only', 'fwk_java_public') \
+        or self._visibility in ('fwk_only', 'fwk_java_public'):
       return ','
     return ', // HIDL v' + str(self._hal_major_version) + '.' + str(self.hal_minor_version)
 
   @property
   def hidden(self):
-    return self.visibility in {'hidden', 'ndk_public', 'test'}
+    return self.visibility in {'hidden', 'ndk_public', 'test', 'extension'}
 
   @property
   def ndk_hidden(self):
@@ -1064,6 +1073,10 @@ class EnumValue(Node):
   def hal_minor_version(self):
     return self._hal_minor_version
 
+  @property
+  def aconfig_flag(self):
+    return self._aconfig_flag
+
   def _get_children(self):
     return None
 
@@ -1078,12 +1091,14 @@ class Enum(Node):
         non-empty id property.
   """
   def __init__(self, parent, values, ids={}, deprecateds=[],
-               optionals=[], visibilities={}, notes={}, sdk_notes={}, ndk_notes={}, hal_versions={}):
+               optionals=[], visibilities={}, notes={}, sdk_notes={}, ndk_notes={},
+               hal_versions={}, aconfig_flags={}):
     self._parent = parent
     self._name = None
     self._values =                                                             \
       [ EnumValue(val, self, ids.get(val), val in deprecateds, val in optionals, visibilities.get(val), \
-                  notes.get(val), sdk_notes.get(val), ndk_notes.get(val), hal_versions.get(val))        \
+                  notes.get(val), sdk_notes.get(val), ndk_notes.get(val), hal_versions.get(val),        \
+                  aconfig_flags.get(val)) \
         for val in values ]
 
   @property
@@ -1133,6 +1148,7 @@ class Entry(Node):
              hwlevels will also include this entry. None means that the
              entry is optional on any hardware level.
     permission_needed: Flags whether the tag needs extra camera permission.
+    aconfig_flag: The aconfig flag name that determines if the entry is actually enabled
     deprecated: Marks an entry as @Deprecated in the Java layer; if within an
                unreleased version this needs to be removed altogether. If applied
                to an entry from an older release, then this means the entry
@@ -1185,6 +1201,7 @@ class Entry(Node):
       enum_notes: A dictionary of value->notes strings.
       enum_ids: A dictionary of value->id strings.
       enum_hal_versions: A dictionary of value->hal version strings
+      enum_aconfig_flags: A dictionary of value->aconfig flag name strings
 
     Args (if the 'deprecated' attribute is true):
       deprecation_description: A string explaining the deprecation, to be added
@@ -1249,8 +1266,8 @@ class Entry(Node):
 
   @property
   def hidl_comment_string(self):
-    if self._visibility == 'fwk_only':
-      return 'fwk_only'
+    if self._visibility in ('fwk_only', 'fwk_java_public'):
+      return self._visibility
     visibility_lj = str(self.applied_visibility).ljust(12)
     return visibility_lj + ' | HIDL v' + str(self._hal_major_version) + '.' + str(self._hal_minor_version)
 
@@ -1279,6 +1296,10 @@ class Entry(Node):
   @property
   def permission_needed(self):
     return self._permission_needed or "false"
+
+  @property
+  def aconfig_flag(self):
+    return self._aconfig_flag
 
   # TODO: optional should just return hwlevel is None
   @property
@@ -1358,6 +1379,10 @@ class Entry(Node):
   def enum(self):
     return self._enum
 
+  @property
+  def session_characteristics_key_since(self):
+    return self._session_characteristics_key_since
+
   def has_new_values_added_in_hal_version(self, hal_major_version, hal_minor_version):
     if self._enum is not None:
       return self._enum.has_new_values_added_in_hal_version(hal_major_version,hal_minor_version)
@@ -1399,6 +1424,8 @@ class Entry(Node):
       self._hal_major_version = int(hal_version.partition('.')[0])
       self._hal_minor_version = int(hal_version.partition('.')[2])
 
+    self._aconfig_flag = kwargs.get('aconfig_flag')
+
     # access these via the 'enum' prop
     enum_values = kwargs.get('enum_values')
     enum_deprecateds = kwargs.get('enum_deprecateds')
@@ -1409,6 +1436,7 @@ class Entry(Node):
     enum_ndk_notes = kwargs.get('enum_ndk_notes')  # { value => ndk_notes }
     enum_ids = kwargs.get('enum_ids')  # { value => notes }
     enum_hal_versions = kwargs.get('enum_hal_versions') # { value => hal_versions }
+    enum_aconfig_flags = kwargs.get('enum_aconfig_flags') # { value => aconfig flags }
 
     self._tuple_values = kwargs.get('tuple_values')
 
@@ -1428,7 +1456,8 @@ class Entry(Node):
 
     if kwargs.get('enum', False):
       self._enum = Enum(self, enum_values, enum_ids, enum_deprecateds, enum_optionals,
-                        enum_visibilities, enum_notes, enum_sdk_notes, enum_ndk_notes, enum_hal_versions)
+                        enum_visibilities, enum_notes, enum_sdk_notes, enum_ndk_notes,
+                        enum_hal_versions, enum_aconfig_flags)
     else:
       self._enum = None
 
@@ -1441,6 +1470,10 @@ class Entry(Node):
     self._permission_needed = kwargs.get('permission_needed')
     self._optional = kwargs.get('optional')
     self._ndk_visible = kwargs.get('ndk_visible')
+
+    self._session_characteristics_key_since = None \
+                  if not kwargs.get('session_characteristics_key_since') \
+                    else int(kwargs.get('session_characteristics_key_since'))
 
     self._property_keys = kwargs
 
@@ -1649,7 +1682,9 @@ class MergedEntry(Entry):
                     'typedef',
                     'hal_major_version',
                     'hal_minor_version',
-                    'permission_needed'
+                    'permission_needed',
+                    'aconfig_flag',
+                    'session_characteristics_key_since'
                    ]
 
     for p in props_common:

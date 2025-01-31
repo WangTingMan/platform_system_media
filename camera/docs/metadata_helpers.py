@@ -27,7 +27,9 @@ import bs4
 # Monkey-patch BS4. WBR element must not have an end tag.
 bs4.builder.HTMLTreeBuilder.empty_element_tags.add("wbr")
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
+from operator import itemgetter
+from os import path
 
 # Relative path from HTML file to the base directory used by <img> tags
 IMAGE_SRC_METADATA="images/camera2/metadata/"
@@ -66,6 +68,31 @@ def find_all_sections(root):
     These are known as "sections" in the generated C code.
   """
   return root.find_all(_is_sec_or_ins)
+
+def find_all_sections_filtered(root, visibility):
+  """
+  Find all descendants that are Section or InnerNamespace instances that do not
+  contain entries of the supplied visibility
+
+  Args:
+    root: a Metadata instance
+    visibilities: An iterable of visibilities to filter against
+
+  Returns:
+    A list of Section/InnerNamespace instances
+
+  Remarks:
+    These are known as "sections" in the generated C code.
+  """
+  sections = root.find_all(_is_sec_or_ins)
+
+  filtered_sections = []
+  for sec in sections:
+    if not any(filter_visibility(find_unique_entries(sec), visibility)):
+      filtered_sections.append(sec)
+
+  return filtered_sections
+
 
 def find_parent_section(entry):
   """
@@ -188,6 +215,8 @@ def protobuf_type(entry):
     "multiResolutionStreamConfigurationMap" : "MultiResolutionStreamConfigurations",
     "deviceStateSensorOrientationMap"  : "DeviceStateSensorOrientationMap",
     "dynamicRangeProfiles"   : "DynamicRangeProfiles",
+    "colorSpaceProfiles"     : "ColorSpaceProfiles",
+    "versionCode"            : "int32",
   }
 
   if typeName not in typename_to_protobuftype:
@@ -767,7 +796,7 @@ def generate_extra_javadoc_detail(entry):
     if entry.enum and not (entry.typedef and entry.typedef.languages.get('java')):
       text += '\n\n<b>Possible values:</b>\n<ul>\n'
       for value in entry.enum.values:
-        if not value.hidden:
+        if not value.hidden and (value.aconfig_flag == entry.aconfig_flag):
           text += '  <li>{@link #%s %s}</li>\n' % ( jenum_value(entry, value ), value.name )
       text += '</ul>\n'
     if entry.range:
@@ -852,7 +881,7 @@ def javadoc(metadata, indent = 4):
     # Convert metadata entry "android.x.y.z" to form
     # "{@link CaptureRequest#X_Y_Z android.x.y.z}"
     def javadoc_crossref_filter(node):
-      if node.applied_visibility in ('public', 'java_public'):
+      if node.applied_visibility in ('public', 'java_public', 'fwk_java_public'):
         return '{@link %s#%s %s}' % (kind_mapping[node.kind],
                                      jkey_identifier(node.name),
                                      node.name)
@@ -862,7 +891,8 @@ def javadoc(metadata, indent = 4):
     # For each public tag "android.x.y.z" referenced, add a
     # "@see CaptureRequest#X_Y_Z"
     def javadoc_crossref_see_filter(node_set):
-      node_set = (x for x in node_set if x.applied_visibility in ('public', 'java_public'))
+      node_set = (x for x in node_set if x.applied_visibility in \
+                  ('public', 'java_public', 'fwk_java_public'))
 
       text = '\n'
       for node in node_set:
@@ -1357,9 +1387,10 @@ def filter_visibility(entries, visibilities):
   """
   return (e for e in entries if e.applied_visibility in visibilities)
 
-def remove_synthetic_or_fwk_only(entries):
+def remove_hal_non_visible(entries):
   """
-  Filter the given entries by removing those that are synthetic or fwk_only.
+  Filter the given entries by removing those that are not HAL visible:
+  synthetic, fwk_only, extension, or fwk_java_public.
 
   Args:
     entries: An iterable of Entry nodes
@@ -1367,7 +1398,9 @@ def remove_synthetic_or_fwk_only(entries):
   Yields:
     An iterable of Entry nodes
   """
-  return (e for e in entries if not (e.synthetic or e.visibility == 'fwk_only'))
+  return (e for e in entries if not (e.synthetic or e.visibility == 'fwk_only'
+                                     or e.visibility == 'fwk_java_public' or
+                                     e.visibility == 'extension'))
 
 """
   Return the vndk version for a given hal minor version. The major version is assumed to be 3
@@ -1410,8 +1443,38 @@ def get_api_level_to_keys(sections, metadata, kind):
   # sort keys)
   api_level_to_keys_ordered = OrderedDict()
   for api_level_ordered in sorted(api_level_to_keys.keys()):
-    api_level_to_keys_ordered[api_level_ordered] = api_level_to_keys[api_level_ordered]
+    api_level_to_keys_ordered[api_level_ordered] = sorted(api_level_to_keys[api_level_ordered])
   return api_level_to_keys_ordered
+
+
+def get_api_level_to_session_characteristic_keys(sections):
+  """
+  Returns a mapping of api_level -> list session characteristics tag keys where api_level
+  is the level at which they became a part of getSessionCharacteristics call.
+
+  Args:
+    sections : metadata sections to create the mapping for
+
+  Returns:
+    A dictionary mapping api level to a list of metadata tags.
+  """
+  api_level_to_keys = defaultdict(list)
+  for sec in sections:
+    for entry in remove_synthetic(find_unique_entries(sec)):
+      if entry.session_characteristics_key_since is None:
+        continue
+
+      api_level = entry.session_characteristics_key_since
+      api_level_to_keys[api_level].append(entry.name)
+
+  # sort dictionary on its key (api_level)
+  api_level_to_keys = OrderedDict(sorted(api_level_to_keys.items(), key=itemgetter(0)))
+  # sort the keys for each api_level
+  for api_level, keys in api_level_to_keys.items():
+    api_level_to_keys[api_level] = sorted(keys)
+
+  return api_level_to_keys
+
 
 def remove_synthetic(entries):
   """
@@ -1466,7 +1529,7 @@ def permission_needed_count(root):
   """
   ret = 0
   for sec in find_all_sections(root):
-      ret += len(list(filter_has_permission_needed(remove_synthetic_or_fwk_only(find_unique_entries(sec)))))
+      ret += len(list(filter_has_permission_needed(remove_hal_non_visible(find_unique_entries(sec)))))
 
   return ret
 
@@ -1557,6 +1620,36 @@ def wbr(text):
 def copyright_year():
   return _copyright_year
 
+def infer_copyright_year_from_source(src_file, default_copyright_year):
+  """
+  Opens src_file and tries to infer the copyright year from the file
+  if it exists. Returns default_copyright_year if src_file is None, doesn't
+  exist, or the copyright year cannot be parsed from the first 15 lines.
+
+  Assumption:
+    - Copyright text must be in the first 15 lines of the src_file.
+      This should almost always be true.
+  """
+  if src_file is None:
+    return default_copyright_year
+
+  if not path.isfile(src_file):
+    return default_copyright_year
+
+  copyright_pattern = r"^.*Copyright \([Cc]\) (20\d\d) The Android Open Source Project$"
+  num_max_lines = 15
+
+  with open(src_file, "r") as f:
+    for i, line in enumerate(f):
+      if i >= num_max_lines:
+        break
+
+      years = re.findall(copyright_pattern, line.strip())
+      if len(years) > 0:
+        return years[0]
+
+  return default_copyright_year
+
 def enum():
   return _enum
 
@@ -1585,7 +1678,7 @@ def find_all_sections_added_in_hal(root, hal_major_version, hal_minor_version):
   for section in all_sections:
     min_major_version = None
     min_minor_version = None
-    for entry in remove_synthetic_or_fwk_only(find_unique_entries(section)):
+    for entry in remove_hal_non_visible(find_unique_entries(section)):
       min_major_version = (min_major_version or entry.hal_major_version)
       min_minor_version = (min_minor_version or entry.hal_minor_version)
       if entry.hal_major_version < min_major_version or \
@@ -1619,3 +1712,19 @@ def aidl_enum_values(entry):
   return [
     val for val in entry.enum.values if '%s_%s'%(csym(entry.name), val.name) not in ignoreList
   ]
+
+def java_symbol_for_aconfig_flag(flag_name):
+  """
+  Returns the java symbol for a give aconfig flag. This means converting
+  snake_case to lower camelCase. For example: The aconfig flag
+  'camera_ae_mode_low_light_boost' becomes 'cameraAeModeLowLightBoost'.
+
+  Args:
+    flag_name: str. aconfig flag in snake_case
+
+  Return:
+    Java symbol for the a config flag.
+  """
+  camel_case = "".join([t.capitalize() for t in flag_name.split("_")])
+  # first character should be lowercase
+  return camel_case[0].lower() + camel_case[1:]

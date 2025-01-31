@@ -1,6 +1,7 @@
 // Build the benchmarks for audio_utils
 
 package {
+    default_team: "trendy_team_android_media_audio_framework",
     // http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // the below license kinds from "system_media_license":
@@ -9,16 +10,54 @@ package {
 }
 
 cc_benchmark {
+    name: "audio_mutex_benchmark",
+
+    srcs: ["audio_mutex_benchmark.cpp"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+
+    shared_libs: [
+        "libaudioutils",
+        "libbase",
+        "liblog",
+        "libutils",
+    ],
+}
+
+cc_benchmark {
+    name: "audio_power_benchmark",
+    host_supported: true,
+
+    srcs: ["audio_power_benchmark.cpp"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wextra",
+    ],
+    shared_libs: [
+        "libbase",
+        "liblog",
+    ],
+    static_libs: [
+        "libaudioutils",
+    ],
+}
+
+cc_benchmark {
     name: "biquad_filter_benchmark",
     host_supported: true,
 
     srcs: ["biquad_filter_benchmark.cpp"],
     cflags: [
-        "-Werror",
         "-Wall",
+        "-Werror",
         "-ffast-math",
-      //  "-fno-vectorize",      // (test only)
-      //  "-fno-slp-vectorize",  // (test only)
+        "-fhonor-infinities",
+        "-fhonor-nans",
+        //  "-fno-vectorize",      // (test only)
+        //  "-fno-slp-vectorize",  // (test only)
     ],
     static_libs: [
         "libaudioutils",
@@ -47,11 +86,13 @@ cc_benchmark {
 
     srcs: ["intrinsic_benchmark.cpp"],
     cflags: [
-        "-Werror",
         "-Wall",
+        "-Werror",
         "-ffast-math",
-      //  "-fno-vectorize",      // (test only)
-      //  "-fno-slp-vectorize",  // (test only)
+        "-fhonor-infinities",
+        "-fhonor-nans",
+        //  "-fno-vectorize",      // (test only)
+        //  "-fno-slp-vectorize",  // (test only)
     ],
     static_libs: [
         "libaudioutils",
@@ -69,8 +110,8 @@ cc_benchmark {
 
     srcs: ["primitives_benchmark.cpp"],
     cflags: [
-        "-Werror",
         "-Wall",
+        "-Werror",
     ],
     static_libs: [
         "libaudioutils",
@@ -83,8 +124,8 @@ cc_benchmark {
 
     srcs: ["statistics_benchmark.cpp"],
     cflags: [
-        "-Werror",
         "-Wall",
+        "-Werror",
     ],
     static_libs: [
         "libaudioutils",

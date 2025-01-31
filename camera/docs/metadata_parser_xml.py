@@ -41,6 +41,8 @@ import os
 from bs4 import BeautifulSoup
 from bs4 import NavigableString
 
+from datetime import datetime
+
 from io import StringIO
 
 from mako.template import Template
@@ -187,6 +189,9 @@ class MetadataParserXml:
     #
     d['permission_needed'] = entry.get('permission_needed')
 
+    # Aconfig flag gating this entry ?
+    d['aconfig_flag'] = entry.get('aconfig_flag')
+
     #
     # Hardware Level (one of limited, legacy, full)
     #
@@ -212,6 +217,10 @@ class MetadataParserXml:
     d['hal_version'] = entry.get('hal_version')
 
     #
+    # HAL version from which this entry became a session characteristic ?
+    d['session_characteristics_key_since'] = entry.get('session_characteristics_key_since')
+
+    #
     # Enum
     #
     if entry.get('enum', 'false') == 'true':
@@ -225,6 +234,7 @@ class MetadataParserXml:
       enum_ndk_notes = {}
       enum_ids = {}
       enum_hal_versions = {}
+      enum_aconfig_flags = {}
       for value in entry.enum.find_all('value'):
 
         value_body = self._strings_no_nl(value)
@@ -258,6 +268,9 @@ class MetadataParserXml:
         if value.attrs.get('hal_version') is not None:
           enum_hal_versions[value_body] = value['hal_version']
 
+        if value.attrs.get('aconfig_flag') is not None:
+          enum_aconfig_flags[value_body] = value['aconfig_flag']
+
       d['enum_values'] = enum_values
       d['enum_deprecateds'] = enum_deprecateds
       d['enum_optionals'] = enum_optionals
@@ -267,6 +280,7 @@ class MetadataParserXml:
       d['enum_ndk_notes'] = enum_ndk_notes
       d['enum_ids'] = enum_ids
       d['enum_hal_versions'] = enum_hal_versions
+      d['enum_aconfig_flags'] = enum_aconfig_flags
       d['enum'] = True
 
     #
@@ -313,7 +327,8 @@ class MetadataParserXml:
 
     return d
 
-  def render(self, template, output_name=None, enum=None, copyright_year="2022"):
+  def render(self, template, output_name=None, enum=None,
+             copyright_year=None):
     """
     Render the metadata model using a Mako template as the view.
 
@@ -331,7 +346,13 @@ class MetadataParserXml:
     buf = StringIO()
     metadata_helpers._context_buf = buf
     metadata_helpers._enum = enum
-    metadata_helpers._copyright_year = copyright_year
+
+    copyright_year = copyright_year \
+                        if copyright_year is not None \
+                        else str(datetime.now().year)
+    metadata_helpers._copyright_year = \
+        metadata_helpers.infer_copyright_year_from_source(output_name,
+                                                          copyright_year)
 
     helpers = [(i, getattr(metadata_helpers, i))
                 for i in dir(metadata_helpers) if not i.startswith('_')]
@@ -365,7 +386,7 @@ if __name__ == "__main__":
   file_name = sys.argv[1]
   template_name = sys.argv[2]
   output_name = sys.argv[3] if len(sys.argv) > 3 else None
-  copyright_year = sys.argv[4] if len(sys.argv) > 4 else "2022"
+  copyright_year = sys.argv[4] if len(sys.argv) > 4 else str(datetime.now().year)
 
   parser = MetadataParserXml.create_from_file(file_name)
   parser.render(template_name, output_name, None, copyright_year)

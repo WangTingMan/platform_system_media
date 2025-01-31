@@ -41,6 +41,21 @@
 
 __BEGIN_DECLS
 
+/*
+ * Note: The following enum values were incorrect and have been updated:
+ * enum                                                        old value                        updated value
+ * ACAMERA_CONTROL_SETTINGS_OVERRIDE                           ACAMERA_CONTROL_START + 49       ACAMERA_CONTROL_START + 52;
+ * ACAMERA_CONTROL_AVAILABLE_SETTINGS_OVERRIDES                ACAMERA_CONTROL_START + 50       ACAMERA_CONTROL_START + 53;
+ * ACAMERA_CONTROL_AUTOFRAMING                                 ACAMERA_CONTROL_START + 52       ACAMERA_CONTROL_START + 55;
+ * ACAMERA_CONTROL_AUTOFRAMING_AVAILABLE                       ACAMERA_CONTROL_START + 53       ACAMERA_CONTROL_START + 56;
+ * ACAMERA_CONTROL_AUTOFRAMING_STATE                           ACAMERA_CONTROL_START + 54       ACAMERA_CONTROL_START + 57;
+ * ACAMERA_CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE        ACAMERA_CONTROL_START + 55       ACAMERA_CONTROL_START + 58;
+ * ACAMERA_CONTROL_LOW_LIGHT_BOOST_STATE                       ACAMERA_CONTROL_START + 56       ACAMERA_CONTROL_START + 59;
+
+ * ACAMERA_SCALER_AVAILABLE_STREAM_USE_CASES                   ACAMERA_SCALER_START + 25        ACAMERA_SCALER_START + 26;
+ * ACAMERA_SCALER_CROP_REGION                                  ACAMERA_SCALER_START + 26        ACAMERA_SCALER_START + 27;
+ */
+
 <%!
   from metadata_helpers import csym
   def annotated_type(entry):
@@ -79,12 +94,12 @@ typedef enum acamera_metadata_section_start {
 typedef enum acamera_metadata_tag {
     % for sec in find_all_sections(metadata):
 <%
-      entries = remove_synthetic_or_fwk_only(find_unique_entries(sec))
+      entries = remove_hal_non_visible(find_unique_entries(sec))
       skip_sec = all(e.applied_ndk_visible == "false" for e in entries)
       if skip_sec:
         continue
 %>\
-      % for idx,entry in enumerate(remove_synthetic_or_fwk_only(find_unique_entries(sec))):
+      % for idx,entry in enumerate(remove_synthetic(find_unique_entries(sec))):
         % if entry.applied_ndk_visible == "true":
           % if entry.deprecated:
     ${ndk(entry.name) + " = " | csym,ljust(60)}// Deprecated! DO NOT USE
@@ -134,7 +149,7 @@ ${entry.applied_ndk_details | ndkdoc(metadata)}\
  */
 
 % for sec in find_all_sections(metadata):
-  % for entry in filter_ndk_visible(remove_synthetic_or_fwk_only(find_unique_entries(sec))):
+  % for entry in filter_ndk_visible(remove_hal_non_visible(find_unique_entries(sec))):
     % if entry.enum:
 // ${ndk(entry.name) | csym}
 typedef enum acamera_metadata_enum_${csym(ndk(entry.name)).lower()} {

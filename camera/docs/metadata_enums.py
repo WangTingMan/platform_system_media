@@ -19,6 +19,7 @@ Generates aidl files for enums needed by camera metadata keys
 """
 
 import sys
+from datetime import datetime
 from metadata_helpers import *
 from metadata_parser_xml import *
 from os.path import relpath
@@ -33,13 +34,13 @@ if __name__ == "__main__":
   file_name = sys.argv[1]
   template_name = sys.argv[2]
   output_dir = sys.argv[3]
-  copyright_year = sys.argv[4] if len(sys.argv) > 4 else "2022"
+  copyright_year = sys.argv[4] if len(sys.argv) > 4 else str(datetime.now().year)
 
   parser = MetadataParserXml.create_from_file(file_name)
   metadata = parser.metadata
 
   for sec in find_all_sections(metadata):
-    for entry in remove_synthetic_or_fwk_only(find_unique_entries(sec)):
+    for entry in remove_hal_non_visible(find_unique_entries(sec)):
       if entry.enum:
         enum_name = entry.name.removeprefix("android.")
         s = enum_name.split(".")

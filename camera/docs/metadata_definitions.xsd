@@ -204,8 +204,10 @@
                     <enumeration value="java_public" /> <!-- java as public SDK. Not included in NDK -->
                     <enumeration value="ndk_public" /> <!-- public in NDK. @hide in java -->
                     <enumeration value="hidden" /> <!-- java as @hide. Not included in NDK -->
+                    <enumeration value="extension" /> <!-- java as @hide. Included as a public key in the extensions. -->
                     <enumeration value="public" /> <!-- public to both java and NDK -->
                     <enumeration value="fwk_only" /> <!-- java as @hide. Not included in NDK. Not included in hal interfaces. -->
+                    <enumeration value="fwk_java_public" /> <!-- public to java. Not included in NDK. Not included in hal interfaces. -->
                 </restriction>
             </simpleType>
         </attribute>
@@ -252,6 +254,8 @@
                 </restriction>
             </simpleType>
         </attribute>
+        <attribute name="aconfig_flag" type="string" />
+        <attribute name="session_characteristics_key_since" type="decimal"/>
     </complexType>
 
     <complexType name="EnumType">
@@ -319,6 +323,7 @@
                     <enumeration value="java_public" /> <!-- java as public SDK. Not included in NDK -->
                     <enumeration value="ndk_public" /> <!-- public in NDK. @hide in java -->
                     <enumeration value="hidden" /> <!-- java as @hide. Not included in NDK -->
+                    <enumeration value="extension" /> <!-- java as @hide. Included as a public enum in the extensions. -->
                     <enumeration value="test" /> <!-- java as @TestApi. Not included in NDK -->
                     <enumeration value="public" /> <!-- public to both java and NDK -->
                 </restriction>
@@ -326,6 +331,7 @@
         </attribute>
         <attribute name="id" type="string" />
         <attribute name="hal_version" type="decimal" default="3.2" />
+        <attribute name="aconfig_flag" type="string" />
     </complexType>
 
     <complexType name="CloneType">
