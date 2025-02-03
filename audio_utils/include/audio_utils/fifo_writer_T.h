@@ -63,7 +63,7 @@ public:
      * Write one T value to FIFO.
      */
     void write1(const T& value)
-            __attribute__((no_sanitize("integer")))     // mLocalRear ++ can wrap
+            /*__attribute__((no_sanitize("integer")))*/     // mLocalRear ++ can wrap
     {
         mBuffer[mLocalRear++ & (mFrameCountP2 - 1)] = value;
     }

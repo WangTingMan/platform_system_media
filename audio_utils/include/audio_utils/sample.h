@@ -18,7 +18,9 @@
 #define ANDROID_AUDIO_SAMPLE_H
 
 #include <stdint.h>
-#include <sys/cdefs.h>
+#include <cutils/cutils_export.h>
+
+#include <audio_utils/libaudioutils_export.h>
 
 __BEGIN_DECLS
 
@@ -30,8 +32,8 @@ __BEGIN_DECLS
  * no infinity, and no NaN.
  */
 typedef int16_t sample_minifloat_t;
-sample_minifloat_t sample_from_float(float f);
-float float_from_sample(sample_minifloat_t sample);
+LIBAUDIOUTILS_EXPORT sample_minifloat_t sample_from_float(float f);
+LIBAUDIOUTILS_EXPORT float float_from_sample(sample_minifloat_t sample);
 
 __END_DECLS
 

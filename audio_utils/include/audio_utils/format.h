@@ -18,8 +18,14 @@
 #define ANDROID_AUDIO_FORMAT_H
 
 #include <stdint.h>
+#ifndef _MSC_VER
 #include <sys/cdefs.h>
+#endif
 #include <system/audio.h>
+
+#include <cutils/cutils_export.h>
+
+#include <audio_utils/libaudioutils_export.h>
 
 /** \cond */
 __BEGIN_DECLS
@@ -61,7 +67,7 @@ __BEGIN_DECLS
  *
  * Logs a fatal error if dst or src format is not allowed by the conversion rules above.
  */
-void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
+LIBAUDIOUTILS_EXPORT void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
         const void *src, audio_format_t src_format, size_t count);
 
 
@@ -82,7 +88,7 @@ void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
  * This may be greater than idxcount, so the return value should be checked
  * if idxary size is less than 32. Returns zero if the input masks are unrecognized.
  */
-size_t memcpy_by_index_array_initialization_from_channel_mask(int8_t *idxary, size_t arysize,
+LIBAUDIOUTILS_EXPORT size_t memcpy_by_index_array_initialization_from_channel_mask(int8_t *idxary, size_t arysize,
         audio_channel_mask_t dst_channel_mask, audio_channel_mask_t src_channel_mask);
 
 /**
@@ -109,7 +115,7 @@ size_t memcpy_by_index_array_initialization_from_channel_mask(int8_t *idxary, si
  *
  * Logs a fatal error if format is not allowed.
  */
-void accumulate_by_audio_format(void *dst, const void *src,
+LIBAUDIOUTILS_EXPORT void accumulate_by_audio_format(void *dst, const void *src,
         audio_format_t format, size_t count);
 
 /** \cond */

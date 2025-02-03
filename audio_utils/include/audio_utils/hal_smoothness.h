@@ -30,7 +30,13 @@
 
 #pragma once
 
+#ifdef _MSC_VER
+#include <cutils/cutils_export.h>
+#else
 #include <sys/cdefs.h>
+#endif
+
+#include <audio_utils/libaudioutils_export.h>
 
 #define HAL_SMOOTHNESS_VERSION_1 1
 
@@ -111,12 +117,12 @@ struct hal_smoothness {
 // private_data: Client defined data that is passed into “client_flush_cb”
 //
 // returns 0 if successful and non-zero on failure.
-int hal_smoothness_initialize(
+LIBAUDIOUTILS_EXPORT int hal_smoothness_initialize(
     struct hal_smoothness **smoothness, unsigned int version,
     unsigned int num_writes_to_log,
     void (*client_flush_cb)(struct hal_smoothness_metrics *, void *),
     void *private_data);
 
-void hal_smoothness_free(struct hal_smoothness **smoothness);
+LIBAUDIOUTILS_EXPORT void hal_smoothness_free(struct hal_smoothness **smoothness);
 
 __END_DECLS

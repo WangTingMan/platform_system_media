@@ -18,7 +18,14 @@
 #define ANDROID_AUDIO_MINIFLOAT_H
 
 #include <stdint.h>
+
+#ifdef _MSC_VER
+#include <cutils/cutils_export.h>
+#else
 #include <sys/cdefs.h>
+#endif
+
+#include <audio_utils/libaudioutils_export.h>
 
 /** \cond */
 __BEGIN_DECLS
@@ -74,10 +81,10 @@ static inline gain_minifloat_t gain_minifloat_unpack_right(gain_minifloat_packed
  * There are 13 significand bits specified, 1 implied hidden bit, 3 exponent bits,
  * and no sign bit.  Denormals are supported.
  */
-gain_minifloat_t gain_from_float(float f);
+LIBAUDIOUTILS_EXPORT gain_minifloat_t gain_from_float(float f);
 
 /** Convert the internal representation used for gains to float */
-float float_from_gain(gain_minifloat_t gain);
+LIBAUDIOUTILS_EXPORT float float_from_gain(gain_minifloat_t gain);
 
 /** \cond */
 __END_DECLS

@@ -91,7 +91,7 @@ struct BiquadDirect2Transpose {
     // D is the data type.  It must be the same element type of T or F.
     // Take care the order of input and output.
     template<typename D, size_t OCCUPANCY = 0x1f>
-    __attribute__((always_inline)) // required for 1ch speedup (30% faster)
+    /*__attribute__((always_inline))*/ // required for 1ch speedup (30% faster)
     void process(D* output, const D* input, size_t frames, size_t stride) {
         using namespace intrinsics;
         // For SSE it is possible to vdup F to T if F is scalar.
@@ -121,7 +121,7 @@ struct BiquadDirect2Transpose {
 
         // For this lambda, attribute always_inline must be used to inline past CHANNELS > 4.
         // The other alternative is to use a MACRO, but that doesn't read as well.
-        const auto KERNEL = [&]() __attribute__((always_inline)) {
+        const auto KERNEL = [&]() /*__attribute__((always_inline))*/ {
             xn = vld1<T>(input);
             input += stride;
 #ifdef USE_DITHER
@@ -345,7 +345,7 @@ struct BiquadStateSpace {
 
         // For this lambda, attribute always_inline must be used to inline past CHANNELS > 4.
         // The other alternative is to use a MACRO, but that doesn't read as well.
-        const auto KERNEL = [&]() __attribute__((always_inline)) {
+        const auto KERNEL = [&]() /*__attribute__((always_inline))*/ {
             x = vld1<T>(input);
             input += stride;
 #ifdef USE_DITHER
@@ -434,7 +434,11 @@ std::array<D, kBiquadNumCoefs> reduceCoefficients(const T& coef) {
         // Remove matched z^-1 factors in top and bottom (e.g. coefs[0] == coefs[3] == 0).
         size_t offset = 0;
         for (; offset < 2 && coef[offset] == 0 && coef[offset + 3] == 0; ++offset);
+#ifdef _MSC_VER
+        assert(coef[offset + 3] != 0); // hmm... shouldn't we be causal?
+#else
         assert(coefs[offset + 3] != 0); // hmm... shouldn't we be causal?
+#endif
 
         // Normalize 6 coefficients to 5 for storage.
         lcoef[0] = coef[offset] / coef[offset + 3];

@@ -51,7 +51,13 @@ static void reset_metrics(struct hal_smoothness_metrics *metrics) {
 }
 
 static bool add_check_overflow(unsigned int *data, unsigned int add_amount) {
+#ifdef _MSC_VER
+    unsigned int result = *data + add_amount;
+    bool r = (result < *data) || (result < add_amount);
+    return r;
+#else
   return __builtin_add_overflow(*data, add_amount, data);
+#endif
 }
 
 static int increment_underrun(struct hal_smoothness *smoothness,

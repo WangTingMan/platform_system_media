@@ -21,7 +21,11 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#ifndef _MSC_VER
 #include <sys/time.h>
+#else
+#include <utils/Timers.h>
+#endif
 #include <time.h>
 
 // These are declared as macros for compatbility with existing uses.

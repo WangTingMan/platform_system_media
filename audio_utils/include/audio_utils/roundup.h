@@ -17,14 +17,19 @@
 #ifndef ANDROID_AUDIO_ROUNDUP_H
 #define ANDROID_AUDIO_ROUNDUP_H
 
+#include <cutils/cutils_export.h>
+#ifndef _MSC_VER
 #include <sys/cdefs.h>
+#endif
+
+#include <audio_utils/libaudioutils_export.h>
 
 /** \cond */
 __BEGIN_DECLS
 /** \endcond */
 
 /** Round up to the next highest power of 2 */
-unsigned roundup(unsigned v);
+LIBAUDIOUTILS_EXPORT unsigned roundup(unsigned v);
 
 /** \cond */
 __END_DECLS

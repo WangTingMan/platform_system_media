@@ -19,6 +19,8 @@
 #include <audio_utils/limiter.h>
 #include <audio_utils/mono_blend.h>
 
+#include <corecrt_math_defines.h>
+
 // TODO: Speed up for special case of 2 channels?
 void mono_blend(void *buf, audio_format_t format, size_t channelCount, size_t frames, bool limit) {
     if (channelCount < 2) {

@@ -23,9 +23,12 @@
 #include <sstream>
 #include <vector>
 
+#include <functional>
+#include <audio_utils/libaudioutils_export.h>
+
 namespace android::audio_utils {
 
-class Balance {
+class LIBAUDIOUTILS_EXPORT Balance {
 public:
    /**
      * \brief Balance processing of left-right volume on audio data.

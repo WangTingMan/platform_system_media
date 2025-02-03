@@ -16,6 +16,10 @@
 
 #include <audio_utils/roundup.h>
 
+#ifndef __builtin_clz
+#define __builtin_clz(a) __lzcnt(a)
+#endif
+
 unsigned roundup(unsigned v)
 {
     // __builtin_clz is undefined for zero input

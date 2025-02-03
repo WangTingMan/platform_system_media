@@ -18,6 +18,8 @@
 #include <audio_utils/channels.h>
 #include "private/private.h"
 
+#include <vector>
+
 /*
  * Clamps a 24-bit value from a 32-bit sample
  */
@@ -147,7 +149,9 @@ static inline uint8x3_t int32_to_uint8x3(int32_t in) {
     size_t num_out_samples = (num_in_samples * (out_buff_chans)) / (in_buff_chans); \
     typeof(out_buff) dst_ptr = (out_buff); \
     typeof(in_buff) src_ptr = (in_buff); \
-    typeof(*out_buff) temp_buff[num_in_samples]; \
+    std::vector<typeof(*out_buff)> buffer; \
+    buffer.resize(num_in_samples); \
+    typeof(*out_buff)* temp_buff = buffer.data(); \
     typeof(out_buff) temp_ptr = temp_buff; \
     /* if in-place, copy input channels to a temp buffer */ \
     if ((in_buff) == (out_buff)) { \
@@ -257,7 +261,9 @@ static inline uint8x3_t int32_to_uint8x3(int32_t in) {
     typeof(out_buff) dst_ptr = (out_buff); \
     typeof(in_buff) src_ptr = (in_buff); \
     size_t num_temp_samples = num_in_samples - num_out_samples; \
-    typeof(*out_buff) temp_buff[num_temp_samples]; \
+    std::vector<typeof(*out_buff)> buffer;  \
+    buffer.resize(num_temp_samples);    \
+    typeof(*out_buff)* temp_buff = buffer.data(); \
     typeof(out_buff) temp_ptr; \
     /* if in-place, copy input channels to a temp buffer instead of out buffer */ \
     if ((in_buff) == (out_buff)) { \
@@ -283,6 +289,18 @@ static inline uint8x3_t int32_to_uint8x3(int32_t in) {
     /* return number of *bytes* generated */ \
     return num_out_samples * sizeof(*(out_buff)); \
 }
+
+template<typename T>
+struct __get_type_
+{
+    using type = std::decay_t<T>;
+};
+
+#ifdef _MSC_VER
+#ifndef typeof
+#define typeof(a) __get_type_<decltype(a)>::type
+#endif
+#endif
 
 /* Channel contracts from a MULTICHANNEL input buffer to a MONO output buffer by mixing the
  * first two input channels into the single output channel (and skipping the rest).

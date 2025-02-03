@@ -30,6 +30,10 @@
 #include <system/audio.h> // FALLTHROUGH_INTENDED
 #include <utils/Errors.h>
 
+#ifndef __attribute__
+#define __attribute__(...)
+#endif
+
 audio_utils_fifo_base::audio_utils_fifo_base(uint32_t frameCount,
         audio_utils_fifo_index& writerRear, audio_utils_fifo_index *throttleFront,
         audio_utils_fifo_sync sync)

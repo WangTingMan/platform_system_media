@@ -27,13 +27,15 @@
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
 
+#include <audio_utils/libaudioutils_export.h>
+
 namespace android::audio_utils {
 
 /**
  * Class used to capture the MEL (momentary exposure levels) values as defined
  * by IEC62368-1 3rd edition. MELs are computed for each second.
  */
-class MelProcessor : public RefBase {
+class LIBAUDIOUTILS_EXPORT MelProcessor : public RefBase {
 public:
 
     static constexpr int kCascadeBiquadNumber = 3;
@@ -161,7 +163,7 @@ private:
     };
 
     // class used to asynchronously execute all MelProcessor callbacks
-    class MelWorker {
+    class LIBAUDIOUTILS_EXPORT MelWorker {
     public:
         static constexpr int kRingBufferSize = 32;
 

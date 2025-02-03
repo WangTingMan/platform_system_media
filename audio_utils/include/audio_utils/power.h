@@ -19,8 +19,28 @@
 
 #include <math.h>
 #include <stdint.h>
+#ifndef _MSC_VER
 #include <sys/cdefs.h>
+#endif
 #include <system/audio.h>
+
+#include <audio_utils/libaudioutils_export.h>
+
+#ifdef __cplusplus
+#ifndef __BEGIN_DECLS
+#define __BEGIN_DECLS extern "C" {
+#endif
+#else
+#define __BEGIN_DECLS
+#endif
+
+#ifdef __cplusplus
+#ifndef __END_DECLS
+#define __END_DECLS }
+#endif
+#else
+#define __END_DECLS
+#endif
 
 /** \cond */
 __BEGIN_DECLS
@@ -42,7 +62,7 @@ __BEGIN_DECLS
  *   if the power is zero.
  */
 
-float audio_utils_compute_power_mono(const void *buffer, audio_format_t format, size_t samples);
+LIBAUDIOUTILS_EXPORT float audio_utils_compute_power_mono(const void *buffer, audio_format_t format, size_t samples);
 
 /**
  * \brief Compute signal energy (sum of squared amplitudes).
@@ -60,7 +80,7 @@ float audio_utils_compute_power_mono(const void *buffer, audio_format_t format, 
  *   normalized to peak to peak range of 1.f.
  */
 
-float audio_utils_compute_energy_mono(const void *buffer, audio_format_t format, size_t samples);
+LIBAUDIOUTILS_EXPORT float audio_utils_compute_energy_mono(const void *buffer, audio_format_t format, size_t samples);
 
 /**
  * \brief Compute for each channel signal energy (sum of squared amplitudes).
@@ -81,7 +101,7 @@ float audio_utils_compute_energy_mono(const void *buffer, audio_format_t format,
  *   out array is updated by adding for each channel the signal energy of the samples
  *   in the buffer (sum of squares).
  */
-void audio_utils_accumulate_energy(const void* buffer,
+LIBAUDIOUTILS_EXPORT void audio_utils_accumulate_energy(const void* buffer,
                                    audio_format_t format,
                                    size_t samples,
                                    size_t numChannels,
@@ -93,7 +113,7 @@ void audio_utils_accumulate_energy(const void* buffer,
  * \param  format        format under consideration.
  * \return true if supported.
  */
-bool audio_utils_is_compute_power_format_supported(audio_format_t format);
+LIBAUDIOUTILS_EXPORT bool audio_utils_is_compute_power_format_supported(audio_format_t format);
 
 /**
  * \brief  Returns the signal power from amplitude.

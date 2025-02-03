@@ -20,7 +20,7 @@
 #ifdef VERY_VERY_VERBOSE_LOGGING
 #define ALOGVV ALOGV
 #else
-#define ALOGVV(a...) do { } while(0)
+#define ALOGVV(...) do { } while(0)
 #endif
 
 #include <audio_utils/MelProcessor.h>

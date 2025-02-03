@@ -25,12 +25,18 @@
 #include <math.h>
 #include <sstream>
 #include <stdint.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#else
+#include <corecrt_io.h>
+#endif
 #include <vector>
 
 #include <audio_utils/clock.h>
 #include <audio_utils/LogPlot.h>
 #include <audio_utils/power.h>
+
+#include <cutils/cutils_export.h>
 
 namespace android {
 

@@ -17,8 +17,14 @@
 #ifndef ANDROID_AUDIO_MONO_BLEND_H
 #define ANDROID_AUDIO_MONO_BLEND_H
 #include <stdint.h>
+#ifdef _MSC_VER
+#include <cutils/cutils_export.h>
+#else
 #include <sys/cdefs.h>
+#endif
 #include <system/audio.h>
+
+#include <audio_utils/libaudioutils_export.h>
 
 /** \cond */
 __BEGIN_DECLS
@@ -40,7 +46,7 @@ __BEGIN_DECLS
  *
  */
 
-void mono_blend(void *buf, audio_format_t format, size_t channelCount, size_t frames,
+LIBAUDIOUTILS_EXPORT void mono_blend(void *buf, audio_format_t format, size_t channelCount, size_t frames,
         bool limit = false);
 
 /** \cond */

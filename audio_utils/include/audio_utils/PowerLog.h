@@ -24,6 +24,8 @@
 #include <system/audio.h>
 #include <utils/Errors.h>
 
+#include <audio_utils/libaudioutils_export.h>
+
 namespace android {
 
 /**
@@ -36,7 +38,7 @@ namespace android {
  * Call framesToProcess() to determine the maximum number of frames to process.
  * Then call processEnergy() with a frame count, and the energy, and the time.
  */
-class PowerLogBase {
+class LIBAUDIOUTILS_EXPORT PowerLogBase {
 public:
     PowerLogBase(uint32_t sampleRate,
             uint32_t channelCount,
@@ -85,7 +87,7 @@ private:
  *
  * The public methods are internally protected by a mutex to be thread-safe.
  */
-class PowerLog {
+class LIBAUDIOUTILS_EXPORT PowerLog {
 public:
 
     /**
@@ -190,7 +192,7 @@ typedef struct power_log_t power_log_t;
  *
  * \return power log object or NULL on failure.
  */
-power_log_t *power_log_create(uint32_t sample_rate,
+LIBAUDIOUTILS_EXPORT power_log_t *power_log_create(uint32_t sample_rate,
         uint32_t channel_count, audio_format_t format, size_t entries, size_t frames_per_entry);
 
 /**
@@ -201,7 +203,7 @@ power_log_t *power_log_create(uint32_t sample_rate,
  * \param frames            buffer size in audio frames.
  * \param now_ns            current time in nanoseconds.
  */
-void power_log_log(power_log_t *power_log, const void *buffer, size_t frames, int64_t now_ns);
+LIBAUDIOUTILS_EXPORT void power_log_log(power_log_t *power_log, const void *buffer, size_t frames, int64_t now_ns);
 
 /**
  * \brief Dumps the log to a raw file descriptor.
@@ -217,7 +219,7 @@ void power_log_log(power_log_t *power_log, const void *buffer, size_t frames, in
  *   NO_ERROR on success or a negative number (-errno) on failure of write().
  *   if power_log is NULL, BAD_VALUE is returned.
  */
-int power_log_dump(
+LIBAUDIOUTILS_EXPORT int power_log_dump(
         power_log_t *power_log, int fd, const char *prefix,  size_t lines, int64_t limit_ns);
 
 /**
@@ -225,7 +227,7 @@ int power_log_dump(
  *
  * \param power_log         object returned by create, if NULL nothing happens.
  */
-void power_log_destroy(power_log_t *power_log);
+LIBAUDIOUTILS_EXPORT void power_log_destroy(power_log_t *power_log);
 
 /** \cond */
 __END_DECLS

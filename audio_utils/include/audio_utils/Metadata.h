@@ -18,8 +18,13 @@
 #define ANDROID_AUDIO_METADATA_H
 
 #include <stdint.h>
+#ifndef _MSC_VER
 #include <sys/cdefs.h>
 #include <unistd.h>
+#endif
+
+#include <cutils/cutils_export.h>
+#include <audio_utils/libaudioutils_export.h>
 
 #ifdef __cplusplus
 
@@ -132,9 +137,12 @@ using is_braces_constructible = decltype(test_is_braces_constructible<T, TArgs..
  */
 template <typename T, typename... Ts>
 inline constexpr ssize_t type_index() {
-    constexpr bool checks[] = {std::is_same_v<std::decay_t<T>, std::decay_t<Ts>>...};
-    for (size_t i = 0; i < sizeof...(Ts); ++i) {
-        if (checks[i]) return i; // the index in Ts.
+    if constexpr (sizeof...(Ts) > 0)
+    {
+        constexpr bool checks[sizeof...(Ts)] = { std::is_same_v<std::decay_t<T>, std::decay_t<Ts>>... };
+        for (size_t i = 0; i < sizeof...(Ts); ++i) {
+            if (checks[i]) return i; // the index in Ts.
+        }
     }
     return -1; // none found.
 }
@@ -194,8 +202,8 @@ struct compound_type {
 
     // helper base class
     template <typename F, typename A>
-    static bool apply_impl(F f __attribute__((unused)), A *a __attribute__((unused)),
-            std::any *result __attribute__((unused))) {
+    static bool apply_impl(F f /*__attribute__((unused))*/, A *a /*__attribute__((unused))*/,
+            std::any *result /*__attribute__((unused))*/) {
         return false;
     }
 };
@@ -417,7 +425,7 @@ public:
     // the following typed form using Key.
 
     // Intentionally there is no get(), we suggest *get_ptr()
-    template <template <typename /* T */, typename... /* enable-ifs */> class K, typename T>
+    template <template <typename T1, typename = std::enable_if_t<is_metadata_type_v<T1>>> class K, typename T>
     T* get_ptr(const K<T>& key, bool allocate = false) {
         auto it = find(key.getName());
         if (it == this->end()) {
@@ -427,7 +435,7 @@ public:
         return std::any_cast<T>(&it->second);
     }
 
-    template <template <typename, typename...> class K, typename T>
+    template <template <typename T1, typename = std::enable_if_t<is_metadata_type_v<T1>>> class K, typename T>
     const T* get_ptr(const K<T>& key) const {
         auto it = find(key.getName());
         if (it == this->end()) return nullptr;
@@ -692,7 +700,7 @@ bool copyToByteString(const Datum& datum, ByteString &bs) {
 using ByteStringUnknowns = std::vector<type_size_t>;
 
 // forward decl for recursion - do not remove.
-bool copyFromByteString(Datum *datum, const ByteString &bs, size_t& idx,
+LIBAUDIOUTILS_EXPORT bool copyFromByteString(Datum *datum, const ByteString &bs, size_t& idx,
         ByteStringUnknowns *unknowns);
 
 template <template <typename ...> class V, typename... Args>
@@ -707,7 +715,7 @@ std::enable_if_t<
         bool
         >
 copyFromByteString(T *dest, const ByteString& bs, size_t& idx,
-        ByteStringUnknowns *unknowns __attribute__((unused))) {
+        ByteStringUnknowns *unknowns /*__attribute__((unused))*/) {
     if (idx + sizeof(T) > bs.size()) return false;
     std::copy(bs.begin() + idx, bs.begin() + idx + sizeof(T), (uint8_t*)dest);
     idx += sizeof(T);
@@ -840,7 +848,7 @@ constexpr bool copyFromByteString(Datum *datum, const ByteString &bs,
 }
 
 template <typename CompoundT>
-__attribute__((noinline))
+/*__attribute__((noinline))*/
 constexpr bool copyFromByteString(Datum *datum, const ByteString &bs,
         size_t &idx, size_t endIdx, ByteStringUnknowns *unknowns, size_t typeIndex) {
   return copyFromByteString<CompoundT>(
@@ -966,7 +974,7 @@ typedef struct { char c; } audio_metadata_unknown_t;
  * \return the metadata object or NULL on failure. Caller must call
  *         audio_metadata_destroy to free memory.
  */
-audio_metadata_t *audio_metadata_create();
+LIBAUDIOUTILS_EXPORT audio_metadata_t *audio_metadata_create();
 
 /**
  * \brief Put key value pair where the value type is int32_t to audio metadata.
@@ -977,7 +985,7 @@ audio_metadata_t *audio_metadata_create();
  * \return 0 if the key value pair is put successfully into the audio metadata.
  *         -EINVAL if metadata or key is null.
  */
-int audio_metadata_put_int32(audio_metadata_t *metadata, const char *key, int32_t value);
+LIBAUDIOUTILS_EXPORT int audio_metadata_put_int32(audio_metadata_t *metadata, const char *key, int32_t value);
 
 /**
  * \brief Put key value pair where the value type is int64_t to audio metadata.
@@ -988,7 +996,7 @@ int audio_metadata_put_int32(audio_metadata_t *metadata, const char *key, int32_
  * \return 0 if the key value pair is put successfully into the audio metadata.
  *         -EINVAL if metadata or key is null.
  */
-int audio_metadata_put_int64(audio_metadata_t *metadata, const char *key, int64_t value);
+LIBAUDIOUTILS_EXPORT int audio_metadata_put_int64(audio_metadata_t *metadata, const char *key, int64_t value);
 
 /**
  * \brief Put key value pair where the value type is float to audio metadata.
@@ -999,7 +1007,7 @@ int audio_metadata_put_int64(audio_metadata_t *metadata, const char *key, int64_
  * \return 0 if the key value pair is put successfully into the audio metadata.
  *         -EINVAL if metadata or key is null.
  */
-int audio_metadata_put_float(audio_metadata_t *metadata, const char *key, float value);
+LIBAUDIOUTILS_EXPORT int audio_metadata_put_float(audio_metadata_t *metadata, const char *key, float value);
 
 /**
  * \brief Put key value pair where the value type is double to audio metadata.
@@ -1010,7 +1018,7 @@ int audio_metadata_put_float(audio_metadata_t *metadata, const char *key, float 
  * \return 0 if the key value pair is put successfully into the audio metadata.
  *         -EINVAL if metadata or key is null.
  */
-int audio_metadata_put_double(audio_metadata_t *metadata, const char *key, double value);
+LIBAUDIOUTILS_EXPORT int audio_metadata_put_double(audio_metadata_t *metadata, const char *key, double value);
 
 /**
  * \brief Put key value pair where the value type is `const char *` to audio metadata.
@@ -1021,7 +1029,7 @@ int audio_metadata_put_double(audio_metadata_t *metadata, const char *key, doubl
  * \return 0 if the key value pair is put successfully into the audio metadata.
  *         -EINVAL if metadata, key or value is null.
  */
-int audio_metadata_put_string(audio_metadata_t *metadata, const char *key, const char *value);
+LIBAUDIOUTILS_EXPORT int audio_metadata_put_string(audio_metadata_t *metadata, const char *key, const char *value);
 
 /**
  * \brief Put key value pair where the value type is audio_metadata_t to audio metadata.
@@ -1032,7 +1040,7 @@ int audio_metadata_put_string(audio_metadata_t *metadata, const char *key, const
  * \return 0 if the key value pair is put successfully into the audio metadata.
  *         -EINVAL if metadata, key or value is null.
  */
-int audio_metadata_put_data(audio_metadata_t *metadata, const char *key, audio_metadata_t *value);
+LIBAUDIOUTILS_EXPORT int audio_metadata_put_data(audio_metadata_t *metadata, const char *key, audio_metadata_t *value);
 
 /**
  * \brief Declared but not implemented, as any potential caller won't supply a correct value.
@@ -1074,7 +1082,7 @@ int audio_metadata_put_unknown(audio_metadata_t *metadata, const char *key,
  *                      2) the type of mapped value is not int32_t.
  *         0 if successfully find the mapped value.
  */
-int audio_metadata_get_int32(audio_metadata_t *metadata, const char *key, int32_t *value);
+LIBAUDIOUTILS_EXPORT int audio_metadata_get_int32(audio_metadata_t *metadata, const char *key, int32_t *value);
 
 /**
  * \brief Get mapped value whose type is int64_t by a given key from audio metadata.
@@ -1087,7 +1095,7 @@ int audio_metadata_get_int32(audio_metadata_t *metadata, const char *key, int32_
  *                      2) the type of mapped value is not int32_t.
  *         0 if successfully find the mapped value.
  */
-int audio_metadata_get_int64(audio_metadata_t *metadata, const char *key, int64_t *value);
+LIBAUDIOUTILS_EXPORT int audio_metadata_get_int64(audio_metadata_t *metadata, const char *key, int64_t *value);
 
 /**
  * \brief Get mapped value whose type is float by a given key from audio metadata.
@@ -1100,7 +1108,7 @@ int audio_metadata_get_int64(audio_metadata_t *metadata, const char *key, int64_
  *                      2) the type of mapped value is not float.
  *         0 if successfully find the mapped value.
  */
-int audio_metadata_get_float(audio_metadata_t *metadata, const char *key, float *value);
+LIBAUDIOUTILS_EXPORT int audio_metadata_get_float(audio_metadata_t *metadata, const char *key, float *value);
 
 /**
  * \brief Get mapped value whose type is double by a given key from audio metadata.
@@ -1113,7 +1121,7 @@ int audio_metadata_get_float(audio_metadata_t *metadata, const char *key, float 
  *                      2) the type of mapped value is not double.
  *         0 if successfully find the mapped value.
  */
-int audio_metadata_get_double(audio_metadata_t *metadata, const char *key, double *value);
+LIBAUDIOUTILS_EXPORT int audio_metadata_get_double(audio_metadata_t *metadata, const char *key, double *value);
 
 /**
  * \brief Get mapped value whose type is std::string by a given key from audio metadata.
@@ -1128,7 +1136,7 @@ int audio_metadata_get_double(audio_metadata_t *metadata, const char *key, doubl
  *         -ENOMEM when fails allocating memory for value.
  *         0 if successfully find the mapped value.
  */
-int audio_metadata_get_string(audio_metadata_t *metadata, const char *key, char **value);
+LIBAUDIOUTILS_EXPORT int audio_metadata_get_string(audio_metadata_t *metadata, const char *key, char **value);
 
 /**
  * \brief Get mapped value whose type is audio_metadata_t by a given key from audio metadata.
@@ -1143,7 +1151,7 @@ int audio_metadata_get_string(audio_metadata_t *metadata, const char *key, char 
  *         -ENOMEM when fails allocating memory for value.
  *         0 if successfully find the mapped value.
  */
-int audio_metadata_get_data(audio_metadata_t *metadata, const char *key, audio_metadata_t **value);
+LIBAUDIOUTILS_EXPORT int audio_metadata_get_data(audio_metadata_t *metadata, const char *key, audio_metadata_t **value);
 
 /**
  * \brief Declared but not implemented, as any potential caller won't supply a correct value.
@@ -1177,14 +1185,14 @@ int audio_metadata_get_unknown(audio_metadata_t *metadata, const char *key,
  * \param key              the key of the item that is going to be removed.
  * \return -EINVAL if metadata or key is null. Otherwise, return the number of elements erased.
  */
-ssize_t audio_metadata_erase(audio_metadata_t *metadata, const char *key);
+LIBAUDIOUTILS_EXPORT ssize_t audio_metadata_erase(audio_metadata_t *metadata, const char *key);
 
 /**
  * \brief Destroys the metadata object
  *
  * \param metadata         object returned by create, if NULL nothing happens.
  */
-void audio_metadata_destroy(audio_metadata_t *metadata);
+LIBAUDIOUTILS_EXPORT void audio_metadata_destroy(audio_metadata_t *metadata);
 
 /**
  * \brief Unpack byte string into a given audio metadata
@@ -1194,7 +1202,7 @@ void audio_metadata_destroy(audio_metadata_t *metadata);
  * \return the audio metadata object that contains the converted data. Caller must call
  *         audio_metadata_destroy to free the memory.
  */
-audio_metadata_t *audio_metadata_from_byte_string(const uint8_t *byteString, size_t length);
+LIBAUDIOUTILS_EXPORT audio_metadata_t *audio_metadata_from_byte_string(const uint8_t *byteString, size_t length);
 
 /**
  * \brief Pack the audio metadata into a byte string
@@ -1206,7 +1214,7 @@ audio_metadata_t *audio_metadata_from_byte_string(const uint8_t *byteString, siz
  *         -ENOMEM if fails to allocate memory for byte string.
  *         The length of the byte string.
  */
-ssize_t byte_string_from_audio_metadata(audio_metadata_t *metadata, uint8_t **byteString);
+LIBAUDIOUTILS_EXPORT ssize_t byte_string_from_audio_metadata(audio_metadata_t *metadata, uint8_t **byteString);
 
 /**
  * \brief Return the size in bytes of the metadata byte string
@@ -1216,7 +1224,7 @@ ssize_t byte_string_from_audio_metadata(audio_metadata_t *metadata, uint8_t **by
  * \param byteString       a valid byte string buffer from byte_string_from_audio_metadata().
  * \return size in bytes of metadata in the buffer or 0 if something went wrong.
  */
-size_t audio_metadata_byte_string_len(const uint8_t *byteString);
+LIBAUDIOUTILS_EXPORT size_t audio_metadata_byte_string_len(const uint8_t *byteString);
 
 /** \cond */
 __END_DECLS

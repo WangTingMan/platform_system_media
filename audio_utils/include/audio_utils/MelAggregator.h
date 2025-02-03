@@ -21,6 +21,8 @@
 #include <map>
 #include <mutex>
 
+#include <audio_utils/libaudioutils_export.h>
+
 namespace android::audio_utils {
 
 struct MelRecord {
@@ -70,7 +72,7 @@ struct CsdRecord {
  *
  * The public methods are internally protected by a mutex to be thread-safe.
  */
-class MelAggregator : public RefBase {
+class LIBAUDIOUTILS_EXPORT MelAggregator : public RefBase {
 public:
 
     explicit MelAggregator(int64_t csdWindowSeconds)

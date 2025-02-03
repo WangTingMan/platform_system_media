@@ -17,7 +17,11 @@
 #ifndef ANDROID_AUDIO_LIMITER_H
 #define ANDROID_AUDIO_LIMITER_H
 
+#ifdef _MSC_VER
+#include <cutils/cutils_export.h>
+#else
 #include <sys/cdefs.h>
+#endif
 
 /** \cond */
 __BEGIN_DECLS

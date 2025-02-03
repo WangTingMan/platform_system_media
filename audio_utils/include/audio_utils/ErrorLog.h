@@ -22,13 +22,41 @@
 #include <iomanip>
 #include <mutex>
 #include <sstream>
+#ifndef _MSC_VER
 #include <unistd.h>
+#else
+#include <corecrt_io.h>
+#endif
 #include <vector>
 
+#ifndef _MSC_VER
 #include <sys/cdefs.h>
+#endif
 
 #include <audio_utils/clock.h>
 #include <utils/Errors.h>
+
+#include <audio_utils/libaudioutils_export.h>
+
+#ifdef __cplusplus
+#ifndef __BEGIN_DECLS
+#define __BEGIN_DECLS extern "C" {
+#endif
+#else
+#define __BEGIN_DECLS
+#endif
+
+#ifdef __cplusplus
+#ifndef __END_DECLS
+#define __END_DECLS }
+#endif
+#else
+#define __END_DECLS
+#endif
+
+#ifndef ssize_t
+#define ssize_t int64_t
+#endif
 
 namespace android {
 
@@ -211,7 +239,7 @@ typedef struct error_log_t error_log_t;
  *                          to be aggregated into a single entry.
  * \return the error log object or NULL on failure.
  */
-error_log_t *error_log_create(size_t entries, int64_t aggregate_ns);
+LIBAUDIOUTILS_EXPORT error_log_t *error_log_create(size_t entries, int64_t aggregate_ns);
 
 /**
  * \brief Adds new error code to the error log.
@@ -223,7 +251,7 @@ error_log_t *error_log_create(size_t entries, int64_t aggregate_ns);
  * \param code              error code of type T.
  * \param now_ns            current time in nanoseconds.
  */
-void error_log_log(error_log_t *error_log, int32_t code, int64_t now_ns);
+LIBAUDIOUTILS_EXPORT void error_log_log(error_log_t *error_log, int32_t code, int64_t now_ns);
 
 /**
  * \brief Dumps the log to a raw file descriptor.
@@ -237,7 +265,7 @@ void error_log_log(error_log_t *error_log, int32_t code, int64_t now_ns);
  *   NO_ERROR on success or a negative number (-errno) on failure of write().
  *   if power_log is NULL, BAD_VALUE is returned.
  */
-int error_log_dump(
+LIBAUDIOUTILS_EXPORT int error_log_dump(
         error_log_t *error_log, int fd, const char *prefix, size_t lines, int64_t limit_ns);
 
 /**
@@ -245,7 +273,7 @@ int error_log_dump(
  *
  * \param error_log         object returned by create, if NULL nothing happens.
  */
-void error_log_destroy(error_log_t *error_log);
+LIBAUDIOUTILS_EXPORT void error_log_destroy(error_log_t *error_log);
 
 /** \cond */
 __END_DECLS

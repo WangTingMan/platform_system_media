@@ -17,6 +17,10 @@
 #include <math.h>
 #include <audio_utils/limiter.h>
 
+#ifdef _MSC_VER
+#include <corecrt_math_defines.h>
+#endif
+
 #undef USE_ATAN_APPROXIMATION
 
 #ifdef USE_ATAN_APPROXIMATION

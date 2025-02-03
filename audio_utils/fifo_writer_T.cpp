@@ -56,7 +56,7 @@ audio_utils_fifo_writer_T<T>::~audio_utils_fifo_writer_T()
 
 template <typename T>
 void audio_utils_fifo_writer_T<T>::write(const T *buffer, uint32_t count)
-        __attribute__((no_sanitize("integer")))     // mLocalRear += can wrap
+        /*__attribute__((no_sanitize("integer")))*/     // mLocalRear += can wrap
 {
     uint32_t availToWrite = mFrameCountP2;
     if (availToWrite > count) {

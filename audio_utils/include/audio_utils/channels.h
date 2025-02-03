@@ -19,6 +19,24 @@
 
 #include <system/audio.h>
 
+#include <bit>
+#include <type_traits>
+
+#include <audio_utils/libaudioutils_export.h>
+
+#ifndef __builtin_ctz
+template<typename T>
+constexpr inline std::size_t ___count_zero( T value)
+{
+    return std::countr_zero(static_cast<std::make_unsigned_t<T>>(value));
+}
+#define __builtin_ctz(x) ___count_zero(x)
+#endif
+
+#ifndef ssize_t
+#define ssize_t int64_t
+#endif
+
 #ifdef __cplusplus
 
 // New development in channels namespace.
@@ -213,7 +231,9 @@ constexpr inline AUDIO_GEOMETRY_DEPTH depthFromChannelIdx(size_t idx) {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winitializer-overrides"  // we use override array assignment
-
+#ifdef _MSC_VER
+constexpr inline int kPairIdxFromChannelIdx[FCC_26] = { 0x00 };
+#else
 constexpr inline int kPairIdxFromChannelIdx[FCC_26] = {
     [ 0 ... 25 ] = -1,  // everything defaults to -1 unless overridden below.
     CHANNEL_ASSOCIATE(AUDIO_CHANNEL_OUT_FRONT_LEFT, AUDIO_CHANNEL_OUT_FRONT_RIGHT)
@@ -235,6 +255,7 @@ constexpr inline int kPairIdxFromChannelIdx[FCC_26] = {
     // AUDIO_CHANNEL_OUT_LOW_FREQUENCY_2       = 0x800000u,
     CHANNEL_ASSOCIATE(AUDIO_CHANNEL_OUT_FRONT_WIDE_LEFT, AUDIO_CHANNEL_OUT_FRONT_WIDE_RIGHT)
 };
+#endif
 #pragma GCC diagnostic pop
 #pragma pop_macro("CHANNEL_ASSOCIATE")
 
@@ -272,7 +293,7 @@ __BEGIN_DECLS
  *   The out and sums buffers must either be completely separate (non-overlapping), or
  *   they must both start at the same address. Partially overlapping buffers are not supported.
  */
-size_t adjust_channels(const void* in_buff, size_t in_buff_chans,
+LIBAUDIOUTILS_EXPORT size_t adjust_channels(const void* in_buff, size_t in_buff_chans,
                        void* out_buff, size_t out_buff_chans,
                        unsigned sample_size_in_bytes, size_t num_in_bytes);
 
@@ -296,7 +317,7 @@ size_t adjust_channels(const void* in_buff, size_t in_buff_chans,
  *   The out and in buffers must either be completely separate (non-overlapping), or
  *   they must both start at the same address. Partially overlapping buffers are not supported.
  */
-size_t adjust_selected_channels(const void* in_buff, size_t in_buff_chans,
+LIBAUDIOUTILS_EXPORT size_t adjust_selected_channels(const void* in_buff, size_t in_buff_chans,
                        void* out_buff, size_t out_buff_chans,
                        unsigned sample_size_in_bytes, size_t num_in_bytes);
 
@@ -321,7 +342,7 @@ size_t adjust_selected_channels(const void* in_buff, size_t in_buff_chans,
  *   The out and in buffers must either be completely separate (non-overlapping), or
  *   they must both start at the same address. Partially overlapping buffers are not supported.
  */
-size_t adjust_channels_non_destructive(const void* in_buff, size_t in_buff_chans,
+LIBAUDIOUTILS_EXPORT size_t adjust_channels_non_destructive(const void* in_buff, size_t in_buff_chans,
                        void* out_buff, size_t out_buff_chans,
                        unsigned sample_size_in_bytes, size_t num_in_bytes);
 

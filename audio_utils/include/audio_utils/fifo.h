@@ -21,6 +21,10 @@
 #include <sys/types.h>
 #include <audio_utils/fifo_index.h>
 
+#include <cutils/cutils_export.h>
+
+#include <audio_utils/libaudioutils_export.h>
+
 #ifndef __cplusplus
 #error C API is no longer supported
 #endif
@@ -43,7 +47,7 @@ enum audio_utils_fifo_sync {
  * At most one reader, called the "throttling reader", can block the writer.
  * The "fill level", or unread frame count, is defined with respect to the throttling reader.
  */
-class audio_utils_fifo_base {
+class LIBAUDIOUTILS_EXPORT audio_utils_fifo_base {
 
 public:
 
@@ -141,7 +145,7 @@ protected:
  * Same as audio_utils_fifo_base, but understands frame sizes and knows about the buffer but does
  * not own it.
  */
-class audio_utils_fifo : public audio_utils_fifo_base {
+class LIBAUDIOUTILS_EXPORT audio_utils_fifo : public audio_utils_fifo_base {
 
     friend class audio_utils_fifo_reader;
     friend class audio_utils_fifo_writer;
@@ -232,7 +236,7 @@ struct audio_utils_iovec {
 /**
  * Based on frameworks/av/include/media/AudioBufferProvider.h
  */
-class audio_utils_fifo_provider {
+class LIBAUDIOUTILS_EXPORT audio_utils_fifo_provider {
 public:
     audio_utils_fifo_provider(audio_utils_fifo& fifo);
     virtual ~audio_utils_fifo_provider();
@@ -352,7 +356,7 @@ protected:
  * The writer is multi-thread safe with respect to reader(s),
  * but not with respect to multiple threads calling the writer API.
  */
-class audio_utils_fifo_writer : public audio_utils_fifo_provider {
+class LIBAUDIOUTILS_EXPORT audio_utils_fifo_writer : public audio_utils_fifo_provider {
 
 public:
     /**
@@ -468,7 +472,7 @@ private:
  * Each reader is multi-thread safe with respect to the writer and any other readers,
  * but not with respect to multiple threads calling the reader API.
  */
-class audio_utils_fifo_reader : public audio_utils_fifo_provider {
+class LIBAUDIOUTILS_EXPORT audio_utils_fifo_reader : public audio_utils_fifo_provider {
 
 public:
     /**

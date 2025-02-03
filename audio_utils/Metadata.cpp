@@ -81,6 +81,7 @@ int audio_metadata_get_int32(audio_metadata_t *metadata, const char *key, int32_
     if (metadata == nullptr || key == nullptr || value == nullptr) {
         return -EINVAL;
     }
+
     int32_t *val = reinterpret_cast<Data *>(metadata)->get_ptr(Key<int32_t>(key));
     if (val == nullptr) {
         return -ENOENT;

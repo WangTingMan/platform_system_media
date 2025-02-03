@@ -18,7 +18,9 @@
 #define ANDROID_AUDIO_CLOCK_NANOSLEEP_H
 
 #include <time.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #ifdef __linux__
 

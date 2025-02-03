@@ -21,13 +21,15 @@
 #include <stdint.h>
 #include <time.h>
 
+#include <audio_utils/libaudioutils_export.h>
+
 /**
  * An index that may optionally be placed in shared memory.
  * Must be Plain Old Data (POD), so no virtual methods are allowed.
  * If in shared memory, exactly one process must explicitly call the constructor via placement new.
  * \see #audio_utils_fifo_sync
  */
-class audio_utils_fifo_index {
+class LIBAUDIOUTILS_EXPORT audio_utils_fifo_index {
 
 public:
     audio_utils_fifo_index() : mIndex(0) { }
