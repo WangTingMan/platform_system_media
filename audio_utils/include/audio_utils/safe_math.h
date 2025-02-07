@@ -19,6 +19,8 @@
 #include <bit>
 #include <cmath>
 
+#include <utils/uitils_overflow_check_ms.h>
+
 namespace android::audio_utils {
 
 /*

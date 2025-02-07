@@ -20,8 +20,10 @@
 
 #include <algorithm>  // std::clamp
 #include <errno.h>
+#ifndef _MSC_VER
 #include <sched.h>    // scheduler
 #include <sys/resource.h>
+#endif
 #include <utils/Errors.h>  // status_t
 #include <utils/Log.h>
 
@@ -31,6 +33,7 @@ namespace android::audio_utils {
  * Sets the unified priority of the tid.
  */
 status_t set_thread_priority(pid_t tid, int priority) {
+#ifndef _MSC_VER
     if (is_realtime_priority(priority)) {
         // audio processes are designed to work with FIFO, not RR.
         constexpr int new_policy = SCHED_FIFO;
@@ -61,6 +64,9 @@ status_t set_thread_priority(pid_t tid, int priority) {
     } else {
         return BAD_VALUE;
     }
+#else
+    return NO_ERROR;
+#endif
 }
 
 /**
@@ -69,6 +75,7 @@ status_t set_thread_priority(pid_t tid, int priority) {
  * A negative number represents error.
  */
 int get_thread_priority(int tid) {
+#ifndef _MSC_VER
     const int policy = sched_getscheduler(tid);
     if (policy < 0) return -errno;
 
@@ -84,6 +91,9 @@ int get_thread_priority(int tid) {
     } else {
         return INVALID_OPERATION;
     }
+#else
+    return 60;
+#endif
 }
 
 } // namespace android::audio_utils

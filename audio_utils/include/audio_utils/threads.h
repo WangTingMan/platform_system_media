@@ -17,9 +17,18 @@
 #pragma once
 
 #include <algorithm>
+#ifndef _MSC_VER
 #include <sys/syscall.h>   // SYS_gettid
 #include <unistd.h>        // bionic gettid
+#endif
 #include <utils/Errors.h>  // status_t
+
+#include <audio_utils/libaudioutils_export.h>
+
+#include <cutils/threads.h>
+#ifndef pid_t
+#define pid_t int
+#endif
 
 namespace android::audio_utils {
 
@@ -104,7 +113,11 @@ pid_t inline gettid_wrapper() {
 #if defined(__BIONIC__)
     return ::gettid();
 #else
+#ifdef _MSC_VER
+    return gettid();
+#else
     return syscall(SYS_gettid);
+#endif
 #endif
 }
 
@@ -134,13 +147,13 @@ pid_t inline gettid_wrapper() {
  * The range of priority is 0 through 139, inclusive.
  * A priority value of 99 is changed to 98.
  */
-status_t set_thread_priority(pid_t tid, int priority);
+LIBAUDIOUTILS_EXPORT status_t set_thread_priority(pid_t tid, int priority);
 
 /**
  * Returns the unified priority of the tid.
  *
  * A negative number represents error.
  */
-int get_thread_priority(int tid);
+LIBAUDIOUTILS_EXPORT int get_thread_priority(int tid);
 
 } // namespace android::audio_utils

@@ -19,13 +19,19 @@
 #define LOG_TAG "audio_utils::mutex"
 #include <utils/Log.h>
 
+#if __has_include(<com_android_media_audioserver.h>)
 #include <com_android_media_audioserver.h>
+#endif
 
 namespace android::audio_utils {
 
 bool mutex_get_enable_flag() {
     static const bool enable = []() {
+#ifdef _MSC_VER
+        const bool flag = true;
+#else
         const bool flag = com::android::media::audioserver::mutex_priority_inheritance();
+#endif
         ALOGD("get_enable_flag: mutex_priority_inheritance: %s", flag ? "true" : "false");
         return flag;
     }();
