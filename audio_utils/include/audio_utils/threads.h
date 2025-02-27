@@ -17,11 +17,9 @@
 #pragma once
 
 #include <algorithm>
-<<<<<<< HEAD
-#ifndef _MSC_VER
-=======
 #include <bitset>
->>>>>>> 020797ee
+
+#ifndef _MSC_VER
 #include <sys/syscall.h>   // SYS_gettid
 #include <unistd.h>        // bionic gettid
 #endif
@@ -33,6 +31,8 @@
 #ifndef pid_t
 #define pid_t int
 #endif
+
+#define CPU_SETSIZE 1024
 
 namespace android::audio_utils {
 

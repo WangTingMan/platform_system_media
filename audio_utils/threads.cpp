@@ -23,11 +23,9 @@
 #ifndef _MSC_VER
 #include <sched.h>    // scheduler
 #include <sys/resource.h>
-<<<<<<< HEAD
 #endif
-=======
+
 #include <thread>
->>>>>>> 020797ee
 #include <utils/Errors.h>  // status_t
 #include <utils/Log.h>
 
@@ -101,6 +99,7 @@ int get_thread_priority(int tid) {
 }
 
 status_t set_thread_affinity(pid_t tid, const std::bitset<kMaxCpus>& mask) {
+#ifndef _MSC_VER
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     const size_t limit = std::min(get_number_cpus(), kMaxCpus);
@@ -112,10 +111,14 @@ status_t set_thread_affinity(pid_t tid, const std::bitset<kMaxCpus>& mask) {
     if (sched_setaffinity(tid, sizeof(cpuset), &cpuset) == 0) {
         return OK;
     }
+#endif
     return -errno;
 }
 
 std::bitset<kMaxCpus> get_thread_affinity(pid_t tid) {
+#ifdef _MSC_VER
+    std::bitset<kMaxCpus> mask;
+#else
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     std::bitset<kMaxCpus> mask;
@@ -127,11 +130,16 @@ std::bitset<kMaxCpus> get_thread_affinity(pid_t tid) {
             }
         }
     }
+#endif
     return mask;
 }
 
 int get_cpu() {
+#ifdef _MSC_VER
+    return 1;
+#else
     return sched_getcpu();
+#endif
 }
 
 /*

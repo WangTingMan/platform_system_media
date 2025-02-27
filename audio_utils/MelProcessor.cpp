@@ -361,7 +361,7 @@ void MelProcessor::setAttenuation(float attenuationDB) {
     mAttenuationDB = attenuationDB;
 }
 
-void MelProcessor::onLastStrongRef(const void* id __attribute__((unused))) {
+void MelProcessor::onLastStrongRef(const void* id /*__attribute__((unused))*/) {
    mMelWorker.stop();
    ALOGV("%s: Stopped thread: %s for device %d", __func__, mMelWorker.mThreadName.c_str(),
          mDeviceId.load());
