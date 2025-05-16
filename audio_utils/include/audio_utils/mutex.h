@@ -1306,6 +1306,13 @@ private:
 
 LIBAUDIOUTILS_EXPORT bool mutex_get_enable_flag();
 
+LIBAUDIOUTILS_EXPORT std::array<mutex_stat<uint64_t, double>, 29>& get_mutex_stat_array_instance();
+
+using thread_mutex_info_used = thread_mutex_info<
+    void* /* mutex handle */, MutexOrder, AudioMutexAttributes::mutex_stack_depth_>;
+
+LIBAUDIOUTILS_EXPORT thread_registry<thread_mutex_info_used>& get_registry_instance();
+
 template <typename Attributes>
 class CAPABILITY("mutex") [[nodiscard]] mutex_impl {
 public:
@@ -1630,14 +1637,18 @@ public:
     // One per-process thread registry, one instance per template typename.
     // Declared here but must be defined in a .cpp otherwise there will be multiple
     // instances if the header is included into different shared libraries.
-    static thread_registry_t& get_registry();
+    static thread_registry_t& get_registry() {
+        return get_registry_instance();
+    }
 
     using stat_array_t = std::array<mutex_stat_t, Attributes::order_size_>;
 
     // One per-process mutex statistics array, one instance per template typename.
     // Declared here but must be defined in a .cpp otherwise there will be multiple
     // instances if the header is included into different shared libraries.
-    static stat_array_t& get_mutex_stat_array();
+    stat_array_t& get_mutex_stat_array() {
+        return get_mutex_stat_array_instance();
+    }
 
 private:
 #ifdef _MSC_VER

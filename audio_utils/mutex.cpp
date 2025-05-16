@@ -40,18 +40,32 @@ bool mutex_get_enable_flag() {
 
 // Define mutex::get_mutex_stat_array here because header-only ODR inline linking
 // results in multiple objects if included into multiple shared libraries.
+#ifdef _MSC_VER
+std::array<mutex_stat<uint64_t, double>, 29>& get_mutex_stat_array_instance() {
+    [[clang::no_destroy]] static constinit std::array<mutex_stat<uint64_t, double>, 29> stat_array{};
+    return stat_array;
+}
+#else
 template<>
 mutex::stat_array_t& mutex::get_mutex_stat_array() {
     [[clang::no_destroy]] static constinit stat_array_t stat_array{};
     return stat_array;
 }
+#endif
 
 // Define mutex::get_registry here because header-only ODR inline linking
 // results in multiple objects if included into multiple shared libraries.
+#ifdef _MSC_VER
+thread_registry<thread_mutex_info_used>& get_registry_instance() {
+    [[clang::no_destroy]] static thread_registry<thread_mutex_info_used> thread_registry{};
+    return thread_registry;
+}
+#else
 template<>
 mutex::thread_registry_t& mutex::get_registry() {
     [[clang::no_destroy]] static thread_registry_t thread_registry{};
     return thread_registry;
 }
+#endif
 
 }  // namespace android::audio_utils
