@@ -20,7 +20,11 @@
 #ifdef __cplusplus
 
 #include <string>
+#ifdef _MSC_VER
+#include <corecrt_io.h>
+#else
 #include <unistd.h>
+#endif
 #include <vector>
 
 #include <cutils/properties.h>
@@ -44,7 +48,11 @@ static inline std::vector<std::string> audio_get_configuration_paths() {
 }
 
 static inline bool audio_is_readable_configuration_file(const char* filePath) {
+#ifdef _MSC_VER
+    return (access(filePath, 0) == 0);
+#else
     return (access(filePath, R_OK) == 0);
+#endif
 }
 
 static inline std::string audio_find_readable_configuration_file(const char* fileName) {
